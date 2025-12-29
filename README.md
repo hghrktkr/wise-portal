@@ -58,7 +58,7 @@
 ---
 
 ## ER図
-[ER](docs\er\er-2025-12-29.svg)
+[docs\er\er-2025-12-29.svg](https://github.com/hghrktkr/wise-portal/blob/main/docs/er/er-2025-12-29.svg)
 ---
 
 ## ページ遷移図
