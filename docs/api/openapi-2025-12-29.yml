@@ -1,0 +1,199 @@
+openapi: 3.0.0
+
+info:
+  title: Wise Portal API
+  description: API for managing Wise Portal resources.
+  version: 2025-12-29
+
+paths:
+  /auth/login:
+    post:
+      summary: ユーザーのログイン(learner | admin)
+      security: []
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: ユーザーのメールアドレス
+                password:
+                  type: string
+                  format: password
+                  description: ユーザーのパスワード
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: 認証トークン
+                  role:
+                    type: string
+                    enum: [learner, admin]
+                    description: ユーザーロール
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+  
+  /learner/dashboard:
+    get:
+      summary: 該当するIDの学習者ダッシュボードの情報取得
+      security:
+        - bearerAuth: []
+      tags:
+        - Learner
+      responses:
+        '200':
+          description: 情報取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  learnerId:
+                    type: string
+                    description: 学習者ID
+                  lessons:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        assignId:
+                          type: string
+                          description: レッスン割り当てID
+                        content:
+                          type: object
+                          properties:
+                            contentId:
+                              type: string
+                              description: コンテンツID
+                            title:
+                              type: string
+                              description: コンテンツタイトル
+                            contentType:
+                              type: string
+                              description: コンテンツタイプ
+                        progress:
+                          type: object
+                          properties:
+                            status:
+                              type: string
+                              enum: [not_started, in_progress, completed]
+                              description: 進捗ステータス
+                            percentage:
+                              type: integer
+                              description: 進捗率(完了フェーズ数/全フェーズ数*100)
+                            startedAt:
+                              type: string
+                              format: date-time
+                              description: 開始日時
+                            completedAt:
+                              type: string
+                              format: date-time
+                              description: 完了日時
+                              nullable: true
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+        '404':
+          description: 学習者が見つからない
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+  
+  /learner/lesson-attempts:
+    post:
+      summary: lesson-attemptsにレコードを作成する
+      security:
+        - bearerAuth: []
+      tags:
+        - Learner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lessonId
+                - currentPhaseId
+              properties:
+                lessonId:
+                  type: number
+                  description: 学習開始するレッスンのID
+                currentPhaseId:
+                  type: number
+                  description: 現在のフェーズID
+      responses:
+        '201':
+          description: レコード作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  attemptId:
+                    type: number
+                    description: 作成されたレコードのID
+                  lessonId:
+                    type: number
+                    description: 学習開始するレッスンのID
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+        '404':
+          description: レッスンが見つからない
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ'
+
+
+          
+
+
+      
