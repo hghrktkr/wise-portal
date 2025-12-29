@@ -62,4 +62,4 @@
 ---
 
 ## ページ遷移図
-[page-transition](docs\navigation\page-transition-2025-12-29.svg)
+[docs\navigation\page-transition-2025-12-29.svg](https://github.com/hghrktkr/wise-portal/blob/main/docs/navigation/page-transition-2025-12-29.svg)
