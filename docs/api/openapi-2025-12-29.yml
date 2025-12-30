@@ -74,45 +74,45 @@ paths:
                   learnerId:
                     type: string
                     description: 学習者ID
-                  lessons:
+                  themes:
                     type: array
+                    description: 学習者のテーマ一覧(各テーマ内のレッスン進捗含む)
                     items:
                       type: object
                       properties:
-                        assignId:
+                        themeId:
                           type: string
-                          description: レッスン割り当てID
-                        content:
-                          type: object
-                          properties:
-                            contentId:
-                              type: string
-                              description: コンテンツID
-                            title:
-                              type: string
-                              description: コンテンツタイトル
-                            contentType:
-                              type: string
-                              description: コンテンツタイプ
-                        progress:
-                          type: object
-                          properties:
-                            status:
-                              type: string
-                              enum: [not_started, in_progress, completed]
-                              description: 進捗ステータス
-                            percentage:
-                              type: integer
-                              description: 進捗率(完了フェーズ数/全フェーズ数*100)
-                            startedAt:
-                              type: string
-                              format: date-time
-                              description: 開始日時
-                            completedAt:
-                              type: string
-                              format: date-time
-                              description: 完了日時
-                              nullable: true
+                          description: テーマID
+                        themeName:
+                          type: string
+                          description: テーマ名
+                        lessons:
+                          type: array
+                          description: テーマ内のレッスン一覧
+                          items:
+                            type: object
+                            properties:
+                              lessonId:
+                                type: string
+                                description: レッスンID
+                              lessonName:
+                                type: string
+                                description: レッスン名
+                              progress:
+                                type: object
+                                description: レッスンの進捗状況
+                                properties:
+                                  status:
+                                    type: string
+                                    enum: [not_started, in_progress, completed]
+                                    description: レッスンの進捗ステータス
+                                  lastAttemptId:
+                                    type: string
+                                    description: 最後に試みたattemptのID
+                                  updatedAt:
+                                    type: string
+                                    format: date-time
+                                    description: 最終更新日時
         '401':
           description: 認証失敗
           content:
@@ -133,10 +133,58 @@ paths:
                   error:
                     type: string
                     description: エラーメッセージ
-  
+
+  /learner/next-lesson:
+    get:
+      summary: 学習者の次に学習すべきレッスン情報を取得
+      security:
+        - bearerAuth: []
+      tags:
+        - Learner
+      responses:
+        '200':
+          description: 次のレッスン情報取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lessonId:
+                    type: string
+                    description: 次に学習すべきレッスンのID
+                  lessonName:
+                    type: string
+                    description: 次に学習すべきレッスンの名前
+                  themeId:
+                    type: string
+                    description: レッスンが属するテーマのID
+                  themeName:
+                    type: string
+                    description: レッスンが属するテーマの名前
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+        '404':
+          description: 学習者または次のレッスンが見つからない
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+
   /learner/lesson-attempts:
     post:
-      summary: lesson-attemptsにレコードを作成する
+      summary: 選択したレッスンのattemptレコードを作成し、attemptId、レッスンIDを返す
       security:
         - bearerAuth: []
       tags:
@@ -149,27 +197,23 @@ paths:
               type: object
               required:
                 - lessonId
-                - currentPhaseId
               properties:
                 lessonId:
-                  type: number
-                  description: 学習開始するレッスンのID
-                currentPhaseId:
-                  type: number
-                  description: 現在のフェーズID
+                  type: string
+                  description: レッスンID
       responses:
         '201':
-          description: レコード作成成功
+          description: レッスンattempt作成成功
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   attemptId:
-                    type: number
-                    description: 作成されたレコードのID
+                    type: string
+                    description: 作成されたレッスンattemptのID
                   lessonId:
-                    type: number
+                    type: string
                     description: 学習開始するレッスンのID
         '401':
           description: 認証失敗
@@ -190,10 +234,277 @@ paths:
                 properties:
                   error:
                     type: string
-                    description: エラーメッセージ'
+                    description: エラーメッセージ
+  
+  /learner/lessons/{lessonId}:
+    get:
+      summary: 指定したレッスンIDのレッスン情報を取得
+      security:
+        - bearerAuth: []
+      tags:
+        - Learner
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 取得するレッスンのID
+      responses:
+        '200':
+          description: レッスン情報取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lessonId:
+                    type: string
+                    description: レッスンID
+                  lessonName:
+                    type: string
+                    description: レッスン名
+                  startPhaseId:
+                    type: string
+                    description: レッスンの開始フェーズID
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+        '404':
+          description: レッスンが見つからない
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+    
+  /learner/phases/{phaseId}:
+    get:
+      summary: 選択したstartPhaseIDのフェーズ情報を取得
+      security:
+        - bearerAuth: []
+      tags:
+        - Learner
+      parameters:
+        - name: phaseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 取得するフェーズのID
+      responses:
+        '200':
+          description: フェーズ情報取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  lessonId:
+                    type: string
+                    description: フェーズが属するレッスンID
+                  phaseId:
+                    type: string
+                    description: フェーズID
+                  content:
+                    type: object
+                    description: フェーズの内容
+                    properties:
+                      type:
+                        type: string
+                        enum: [instruction, exercise]
+                        description: コンテンツの種類
+                      body:
+                        type: string
+                        description: コンテンツのデータ
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+        '404':
+          description: フェーズが見つからない
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
 
+  /learner/phases/{phaseId}/complete:
+    post:
+      summary: フェーズ完了の記録を作成し、次のフェーズIDを返す
+      security:
+        - bearerAuth: []
+      tags:
+        - Learner
+      parameters:
+        - name: phaseId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 完了するフェーズのID
+      responses:
+        '200':
+          description: フェーズ完了成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nextPhaseId:
+                    type: string
+                    description: 次のフェーズのID（存在する場合）
+                  isLessonCompleted:
+                    type: boolean
+                    description: レッスンが完了したかどうか
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+        '404':
+          description: フェーズが見つからない
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
 
-          
-
-
-      
+  /learner/lessons/{lessonId}/feedback:
+    get:
+      summary: レッスンフィードバックの取得
+      security:
+        - bearerAuth: []
+      tags:
+        - Learner
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: フィードバックを取得するレッスンのID
+      responses:
+        '200':
+          description: フィードバック取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rating:
+                    type: integer
+                    description: レッスンの評価
+                  comments:
+                    type: string
+                    description: レッスンに関するコメント
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+        '404':
+          description: レッスンまたはフィードバックが見つからない
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+                    
+    post:
+      summary: レッスンフィードバックの送信
+      security:
+        - bearerAuth: []
+      tags:
+        - Learner
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: フィードバックを送信するレッスンのID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - rating
+                - comments
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  description: レッスンの評価（1から5の範囲）
+                comments:
+                  type: string
+                  description: レッスンに関するコメント
+      responses:
+        '201':
+          description: フィードバック送信成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: 成功メッセージ
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
+        '404':
+          description: レッスンが見つからない
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: エラーメッセージ
