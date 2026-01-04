@@ -56,9 +56,9 @@ paths:
                     type: string
                     description: エラーメッセージ
   
-  /learner/dashboard:
+  /learner/get-progress:
     get:
-      summary: 該当するIDの学習者ダッシュボードの情報取得
+      summary: 該当するIDの学習者の、各テーマ、レッスンの進捗情報取得
       security:
         - bearerAuth: []
       tags:
