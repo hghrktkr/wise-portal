@@ -5,7 +5,7 @@ interface LessonData {
     phases: PhaseData[];
 }
 
-interface PhaseData {
+export interface PhaseData {
     id: string;
     type: 'instruction' | 'exercise';
     orderIndex: number;
