@@ -76,9 +76,7 @@ function StepBar({currentPhaseId, phases}: StepBarProps) {
                                 {isFinished && <FaCheck color="white"/>}
                             </div>
                         </div>
-
-                        {index < phaseLength - 1 && <div className={`step-line ${isFinished ? 'finished' : ''}`}></div>}
-
+                        {index < phaseLength - 1 && <div className={`step-line ${isFinished ? 'finished' : ''}`} ></div>}
                     </div>
                 );
             })}
