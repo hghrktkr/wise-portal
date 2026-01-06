@@ -5,6 +5,9 @@
     font-weight: bold;
 }
 
+.step {
+}
+
 .step-content {
     display: grid;
     place-items: center;
