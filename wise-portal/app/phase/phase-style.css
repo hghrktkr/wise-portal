@@ -1,0 +1,71 @@
+.step-bar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+.step-content {
+    display: grid;
+    place-items: center;
+}
+
+.step-label {
+    color: gray;
+    font-size: large;
+    justify-content: center;
+    align-items: center;
+}
+
+.step-label.current {
+    color: limegreen;
+}
+
+.step-label.finished {
+    color: limegreen;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: gray;
+    transition: background-color 0.3s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.step-circle.current {
+    width: 40px;
+    height: 40px;
+    background-color: transparent; /* アクティブな色 */
+    border: 5px solid limegreen;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.step-circle.finished {
+    background-color: limegreen;
+}
+
+.step-line {
+    max-width: fit-content;
+    width: 800px;
+    height: 5px;
+    background-color: gray;
+}
+
+.step-line.finished {
+    background-color: limegreen;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

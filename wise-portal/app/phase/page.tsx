@@ -1,13 +1,14 @@
 'use client';
 import { DUMMY_LESSON, PhaseData } from "./dummyData";
-import { BarChart, Bar, LabelList, XAxis, YAxis } from "recharts";
+import { FaCheck } from "react-icons/fa";
+import "./phase-style.css";
 
 export default function PhasePage() {
     return (
         <div>
             <PhaseHeader title={DUMMY_LESSON.title} />
 
-            <ProgressBar currentPhaseId="phase_1" phases={DUMMY_LESSON.phases} />
+            <StepBar currentPhaseId="phase_2" phases={DUMMY_LESSON.phases} />
 
             <PhaseDescription description={DUMMY_LESSON.description} />
 
@@ -33,36 +34,55 @@ function PhaseHeader({title}: PhaseHeaderProps) {
     );
 }
 
-interface ProgressBarProps {
+interface StepBarProps {
     currentPhaseId: string;
     phases: PhaseData[];
 }
 
-function ProgressBar({currentPhaseId, phases}: ProgressBarProps) {
-
-    const phaseIds = phases.map((phase) => {
+function StepBar({currentPhaseId, phases}: StepBarProps) {
+    const phaseLength: number = phases.length;
+    const phaseIds: string[] = phases.map((phase) => {
         return phase.id;
     });
+    const phaseTypes = phases.map((phase) =>{
+        switch (phase.type) {
+            case 'instruction':
+                return '📝説明'
+            
+            case 'exercise':
+                return '✏️練習'
 
-    const phaseLength: number = phaseIds.length;
+            case 'feedback':
+                return '⭐感想'
+            default:
+                break;
+        }
+    })
     const currentPhaseIndex: number = phaseIds.indexOf(currentPhaseId);
 
-    if(currentPhaseIndex === -1) return null;
-
-    const percentage: number = Math.floor((currentPhaseIndex + 1) / phaseLength * 100);
-    const left: number = 100 - percentage;
-    const data = [
-        {name: 'progress', value: percentage},
-        {name: 'shadow', value: left}
-    ];
-
     return (
-        <BarChart width={1000} height={60} data={data} layout="vertical">
-            <Bar dataKey='value' stackId='a' fill="#8884d8" radius={[10, 0, 0, 10]}/>
-            <Bar dataKey='value' stackId='a' fill="#888888ff" radius={[0, 10, 10, 0]}/>
-            <XAxis type='number' dataKey={'value'} domain={[0, 100]} />
-            <YAxis type='category' dataKey={'name'} />
-        </BarChart>
+        <div className="step-bar-container">
+            {phaseTypes.map((label, index) =>{
+                const isFinished = index < currentPhaseIndex;
+                const isCurrent = index === currentPhaseIndex;
+
+                return (
+                    <div className="step" key={index}>
+                        <div className="step-content">
+                            <div className={`step-label ${isFinished ? 'finished' : isCurrent ? 'current' : ''}`}>
+                                {label}
+                            </div>
+                            <div className={`step-circle ${isFinished ? 'finished' : isCurrent ? 'current' : ''}`}>
+                                {isFinished && <FaCheck color="white"/>}
+                            </div>
+                        </div>
+
+                        {index < phaseLength - 1 && <div className={`step-line ${isFinished ? 'finished' : ''}`}></div>}
+
+                    </div>
+                );
+            })}
+        </div>
     );
 }
 

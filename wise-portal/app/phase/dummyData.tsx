@@ -7,7 +7,7 @@ interface LessonData {
 
 export interface PhaseData {
     id: string;
-    type: 'instruction' | 'exercise';
+    type: 'instruction' | 'exercise' | 'feedback';
     orderIndex: number;
     contents: ContentData[];
 }
@@ -91,8 +91,51 @@ export const DUMMY_LESSON: LessonData = {
         },
         {
             id: 'phase_2',
-            type: 'exercise',
+            type: 'instruction',
             orderIndex: 2,
+            contents: [
+                {
+                    id: 'content_i4',
+                    body: [
+                        {
+                            kind: 'text',
+                            value: 'instructionテストデータ1(文面のみ)'
+                        }
+                    ],
+                    needsAnswer: false
+                },
+                {
+                    id: 'content_i5',
+                    body: [
+                        {
+                            kind: 'image',
+                            src: '/images/lesson/example.png',
+                            alt: 'テスト画像ダミー'
+                        }
+                    ],
+                    needsAnswer: false
+                },
+                {
+                    id: 'content_i6',
+                    body: [
+                        {
+                            kind: 'text',
+                            value: 'instructionテストデータ1(文面と画像)'
+                        },
+                        {
+                            kind: 'image',
+                            src: '/images/lesson/example.png',
+                            alt: 'テスト画像ダミー'
+                        }
+                    ],
+                    needsAnswer: false
+                }
+            ]
+        },
+        {
+            id: 'phase_3',
+            type: 'exercise',
+            orderIndex: 3,
             contents: [
                 {
                     id: 'content_e1',
@@ -146,6 +189,23 @@ export const DUMMY_LESSON: LessonData = {
                             kind: 'image',
                             src: '/images/lesson/example.png',
                             alt: 'テスト画像ダミー'
+                        }
+                    ],
+                    needsAnswer: true
+                }
+            ]
+        },
+        {
+            id: 'phase_4',
+            type: 'feedback',
+            orderIndex: 4,
+            contents: [
+                {
+                    id: 'content_f1',
+                    body: [
+                        {
+                            kind: 'text',
+                            value: 'このレッスンの感想を入力してください。'
                         }
                     ],
                     needsAnswer: true
