@@ -1,9 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap');
+
+.header-container {
+    height: 5dvh;
+    min-height: 40px;
+    background-color: cornflowerblue;
+    padding-left: 1%;
+    padding-right: 1%;
+    display: flex;
+    align-items: center;
+}
+
+.header-wrapper {
+    margin-top: 0.5dvh;
+    display: flex;
+}
+
+.logo-svg {
+    display: block;
+    height: 4dvh;
+    filter: brightness(0) saturate(100%) 
+            invert(16%) sepia(96%)saturate(7359%) 
+            hue-rotate(360deg) brightness(100%) contrast(112%);
+}
+
+.title {
+    margin-left: 0.5dvw;
+    margin-right: 0.5dvw;
+    font-size: clamp(1rem, 2vw, 2rem);
+    font-family: 'M PLUS Rounded 1c';
+    font-weight: 800;
+    color: blueviolet;
+}
+
 .step-bar-container {
+    background-color: rgb(231, 231, 231);
     display: flex;
     justify-content: center;
     padding-left: 5%;
     padding-right: 5%;
-    padding-top: 24px;
+    padding-top: clamp(0.5rem, 1vh, 2rem);
+    padding-bottom: clamp(0.5rem, 1vh, 2rem);
     font-weight: bold;
 }
 
@@ -78,4 +114,13 @@
   50% {
     opacity: 0.5;
   }
+}
+
+.description-container {
+    padding-left: 1%;
+    padding-right: 1%;
+    margin: 1rem;
+    font-size: clamp(1rem, 1vw, 2rem);
+    font-family: 'M PLUS Rounded 1c';
+    font-weight: 400;
 }

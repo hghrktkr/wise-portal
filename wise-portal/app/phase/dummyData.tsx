@@ -44,7 +44,7 @@ type ContentBlock = TextBlock | ImageBlock | ExerciseBlock;
 export const DUMMY_LESSON: LessonData = {
     id: 'lesson_test',
     title: 'テストレッスンタイトル',
-    description: 'instruction、exerciseを含むダミーデータ',
+    description: 'ここにレッスンの学習内容や目標を記載する。',
     phases: [
         {
             id: 'phase_1',

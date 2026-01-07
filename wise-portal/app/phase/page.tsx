@@ -26,10 +26,13 @@ interface PhaseHeaderProps {
 
 function PhaseHeader({title}: PhaseHeaderProps) {
     return (
-        <header>
-            <h1>
-                {title}
-            </h1>
+        <header className="header-container">
+            <div className="header-wrapper">
+                <img className="logo-svg" src='/logo/logo-icon.svg' alt="Wise Portal" />
+                <h1 className="title">
+                    {title}
+                </h1>
+            </div>
         </header>
     );
 }
@@ -92,7 +95,9 @@ interface PhaseDescriptionProps {
 
 function PhaseDescription({description}: PhaseDescriptionProps) {
     return (
-        <h2>{description}</h2>
+        <div className="description-container">
+            <div className="description">{description}</div>
+        </div>
     );
 }
 
