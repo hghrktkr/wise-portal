@@ -1,6 +1,6 @@
 'use client';
 import { DUMMY_LESSON, PhaseData } from "./dummyData";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar } from "react-icons/fa";
 import "./phase-style.css";
 
 export default function PhasePage() {
@@ -39,41 +39,43 @@ interface StepBarProps {
     phases: PhaseData[];
 }
 
+const STEPBAR_UI = {
+    instruction: {
+        label: '説明',
+        icon: FaChalkboardTeacher
+    },
+    exercise: {
+        label: '練習',
+        icon: FaPencilAlt
+    },
+    feedback: {
+        label: '感想',
+        icon: FaStar
+    }
+}
+
 function StepBar({currentPhaseId, phases}: StepBarProps) {
     const phaseLength: number = phases.length;
     const phaseIds: string[] = phases.map((phase) => {
         return phase.id;
     });
-    const phaseTypes = phases.map((phase) =>{
-        switch (phase.type) {
-            case 'instruction':
-                return '📝説明'
-            
-            case 'exercise':
-                return '✏️練習'
-
-            case 'feedback':
-                return '⭐感想'
-            default:
-                break;
-        }
-    })
     const currentPhaseIndex: number = phaseIds.indexOf(currentPhaseId);
 
     return (
         <div className="step-bar-container">
-            {phaseTypes.map((label, index) =>{
-                const isFinished = index < currentPhaseIndex;
-                const isCurrent = index === currentPhaseIndex;
+            {phases.map((phase, index) =>{
+                const isFinished: boolean = index < currentPhaseIndex;
+                const isCurrent: boolean = index === currentPhaseIndex;
+                const ui = STEPBAR_UI[phase.type];
 
                 return (
                     <div className="step" key={index}>
                         <div className="step-content">
                             <div className={`step-label ${isFinished ? 'finished' : isCurrent ? 'current' : ''}`}>
-                                {label}
+                                {ui.label}
                             </div>
                             <div className={`step-circle ${isFinished ? 'finished' : isCurrent ? 'current' : ''}`}>
-                                {isFinished && <FaCheck color="white"/>}
+                                {isFinished ? <FaCheck color="white"/> : <ui.icon color="white"/>}
                             </div>
                         </div>
                         {index < phaseLength - 1 && <div className={`step-line ${isFinished ? 'finished' : ''}`} ></div>}

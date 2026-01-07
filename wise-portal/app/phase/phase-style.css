@@ -5,19 +5,20 @@
     padding-right: 5%;
     padding-top: 24px;
     font-weight: bold;
-    position: relative;
 }
 
 .step {
     max-width: 80%;
-    display: flex;
     justify-content: center;
     align-items: center;
+    flex: 1;
 }
 
 .step-content {
+    display: flex;
+    flex-direction: column;
     place-items: center;
-    display: grid;
+    align-items: center;
 }
 
 .step-label {
@@ -25,8 +26,6 @@
     font-size: large;
     justify-content: center;
     align-items: center;
-    position: absolute;
-    top: -1;
 }
 
 .step-label.current {
@@ -47,12 +46,11 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    z-index: 1;
 }
 
 .step-circle.current {
-    background-color: transparent; /* アクティブな色 */
-    border: 5px solid limegreen;
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    background-color: limegreen;
 }
 
 .step-circle.finished {
@@ -60,10 +58,12 @@
 }
 
 .step-line {
-    max-width: 240px;
-    min-width: 30px;
-    height: 5px;
+    height: 3px;
     background-color: gray;
+    position: relative;
+    top: -15px;
+    left: 50%;
+    z-index: 0;
 }
 
 .step-line.finished {
