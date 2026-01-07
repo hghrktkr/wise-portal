@@ -1,18 +1,26 @@
 'use client';
-import { DUMMY_LESSON, PhaseData } from "./dummyData";
+import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, PhaseData, TextBlock } from "./dummyData";
 import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar } from "react-icons/fa";
 import "./phase-style.css";
 
 export default function PhasePage() {
+    const currentPhaseId: string = "phase_1";
+    const phaseIds = DUMMY_LESSON.phases.map((phase) => {
+        return phase.id;
+    });
+    const currentPhaseIndex: number = phaseIds.indexOf(currentPhaseId);
+    const currentPhaseType: string = DUMMY_LESSON.phases[currentPhaseIndex].type;
+    const currentContents: ContentData[] = DUMMY_LESSON.phases[currentPhaseIndex].contents;
+
     return (
         <div>
             <PhaseHeader title={DUMMY_LESSON.title} />
 
-            <StepBar currentPhaseId="phase_2" phases={DUMMY_LESSON.phases} />
+            <StepBar currentPhaseId={currentPhaseId} phases={DUMMY_LESSON.phases} />
 
             <PhaseDescription description={DUMMY_LESSON.description} />
 
-            {/* <CardField /> */}
+            <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} />
 
             {/* <Footer /> */}
 
@@ -72,7 +80,7 @@ function StepBar({currentPhaseId, phases}: StepBarProps) {
                 const ui = STEPBAR_UI[phase.type];
 
                 return (
-                    <div className="step" key={index}>
+                    <div className="step" key={phase.id}>
                         <div className="step-content">
                             <div className={`step-label ${isFinished ? 'finished' : isCurrent ? 'current' : ''}`}>
                                 {ui.label}
@@ -102,19 +110,61 @@ function PhaseDescription({description}: PhaseDescriptionProps) {
 }
 
 interface CardFieldProps {
-
+    currentPhaseType: string;
+    currentContents: ContentData[];
 }
 
-function CardField() {
-
+function CardField({currentPhaseType, currentContents}: CardFieldProps) {
+    return (
+        <div className="card-field-container">
+            {currentContents.map((content) => {
+                return (
+                    <div className={`card-wrapper ${currentPhaseType}`} key={content.id}>
+                        {content.body.map((block) => {
+                            switch (block.kind) {
+                                case 'text':
+                                    return <TextCardBlock key={block.id} item={block}/>;
+                                case 'image':
+                                    return <ImageCardBlock key={block.id} item={block}/>;
+                                case 'exercise':
+                                    return <ExerciseCardBlock key={block.id} item={block}/>;
+                                default:
+                                    return null;
+                            }
+                        })}
+                    </div>
+                );
+            })}
+        </div>
+    );
 }
 
-interface CardProps {
-
+interface TextCardBlockProps {
+    item: TextBlock;
 }
 
-function Card() {
+function TextCardBlock({item}: TextCardBlockProps) {
+    return (<div className='text-item'>{item.value}</div>);
+}
 
+interface ImageCardBlockProps {
+    item: ImageBlock;
+}
+
+function ImageCardBlock({item}: ImageCardBlockProps) {
+    return (<img className="image-item" src={item.src} alt={item.alt ?? ''}/>);
+}
+
+interface ExerciseCardBlockProps {
+    item: ExerciseBlock;
+}
+
+function ExerciseCardBlock({item}: ExerciseCardBlockProps) {
+    return (
+        <div className="exercise-block-wrapper">
+            <div className="question">{item.question}</div>
+        </div>
+    )
 }
 
 interface FooterProps {
