@@ -152,7 +152,7 @@ interface ImageCardBlockProps {
 }
 
 function ImageCardBlock({item}: ImageCardBlockProps) {
-    return (<img className="image-item" src={item.src} alt={item.alt ?? ''}/>);
+    return (<img className="image-item" loading="lazy" src={item.src} alt={item.alt ?? ''}/>);
 }
 
 interface ExerciseCardBlockProps {

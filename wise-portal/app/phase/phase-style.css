@@ -132,6 +132,7 @@
 .card-wrapper {
     min-height: 20dvh;
     display: flex;
+    flex-direction: row;
     padding: 1% 2% 1% 2%;
     margin: 2rem;
     border-radius: 12px;
@@ -155,15 +156,25 @@
 }
 
 .text-item {
+    flex: 1;
+    margin: 1%;
     font-family: 'M PLUS Rounded 1c';
-    font-weight: 200;
-    font-size: clamp(1rem, 24px, 4rem);
+    font-weight: 400;
+    font-size: clamp(1rem, 2vw, 2rem);
+    line-height: 1.7;
     color: rgb(31, 30, 30);
 }
 
 .image-item {
-  max-width: 60%;
-  max-height: 70%;
-  border-radius: 8px;
-  align-self: center;
+    flex: 1;
+    margin: 1%;
+    max-width: 70%;
+    max-height: 70dvh;
+    align-self: center;
+}
+
+@media (max-width: 767px) {
+    .card-wrapper {
+        flex-direction: column;
+    }
 }
