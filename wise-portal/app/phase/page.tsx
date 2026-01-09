@@ -1,28 +1,42 @@
 'use client';
-import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, PhaseData, TextBlock } from "./dummyData";
+import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, LessonData, PhaseData, TextBlock } from "./dummyData";
 import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar } from "react-icons/fa";
 import "./phase-style.css";
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function PhasePage() {
-    const currentPhaseId: string = "phase_1";
-    const phaseIds = DUMMY_LESSON.phases.map((phase) => {
-        return phase.id;
-    });
-    const currentPhaseIndex: number = phaseIds.indexOf(currentPhaseId);
-    const currentPhaseType: string = DUMMY_LESSON.phases[currentPhaseIndex].type;
-    const currentContents: ContentData[] = DUMMY_LESSON.phases[currentPhaseIndex].contents;
+    const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+    const pageData: LessonData = DUMMY_LESSON;
+    const currentPhase: PhaseData = pageData.phases[currentPhaseIndex];
+    const phaseLength: number = pageData.phases.length;
+    const currentPhaseType: string = currentPhase.type;
+    const currentContents: ContentData[] = currentPhase.contents;
+
+    const canGoNext = (currentPhaseIndex < phaseLength -1) && (currentPhase.type !== 'exercise');
+    const canGoPrevious = (currentPhaseIndex > 0) && (currentPhase.type !== 'exercise');
+
+
+    const goNextPhase = () => {
+        if(canGoNext) setCurrentPhaseIndex(currentPhaseIndex + 1);
+    }
+
+    const goPrevPhase = () => {
+        if(canGoPrevious) setCurrentPhaseIndex(Math.max(0, currentPhaseIndex - 1));
+    }
 
     return (
         <div>
             <PhaseHeader title={DUMMY_LESSON.title} />
 
-            <StepBar currentPhaseId={currentPhaseId} phases={DUMMY_LESSON.phases} />
+            <StepBar currentPhaseIndex={currentPhaseIndex} phases={DUMMY_LESSON.phases} phaseLength={phaseLength} />
 
             <PhaseDescription description={DUMMY_LESSON.description} />
 
             <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} />
 
-            {/* <Footer /> */}
+            <Footer currentPhaseIndex={currentPhaseIndex} phaseLength={phaseLength} canGoNext={canGoNext} canGoPrevious={canGoPrevious} onGoNext={goNextPhase} onGoPrevious={goPrevPhase}/>
 
         </div>
     );
@@ -46,8 +60,9 @@ function PhaseHeader({title}: PhaseHeaderProps) {
 }
 
 interface StepBarProps {
-    currentPhaseId: string;
+    currentPhaseIndex: number;
     phases: PhaseData[];
+    phaseLength: number;
 }
 
 const STEPBAR_UI = {
@@ -65,13 +80,7 @@ const STEPBAR_UI = {
     }
 }
 
-function StepBar({currentPhaseId, phases}: StepBarProps) {
-    const phaseLength: number = phases.length;
-    const phaseIds: string[] = phases.map((phase) => {
-        return phase.id;
-    });
-    const currentPhaseIndex: number = phaseIds.indexOf(currentPhaseId);
-
+function StepBar({currentPhaseIndex, phases, phaseLength}: StepBarProps) {
     return (
         <div className="step-bar-container">
             {phases.map((phase, index) =>{
@@ -144,7 +153,13 @@ interface TextCardBlockProps {
 }
 
 function TextCardBlock({item}: TextCardBlockProps) {
-    return (<div className='text-item'>{item.value}</div>);
+    return (
+        <div className='text-item'>
+            <ReactMarkdown 
+            >
+                {item.value}
+            </ReactMarkdown>
+        </div>);
 }
 
 interface ImageCardBlockProps {
@@ -152,7 +167,28 @@ interface ImageCardBlockProps {
 }
 
 function ImageCardBlock({item}: ImageCardBlockProps) {
-    return (<img className="image-item" loading="lazy" src={item.src} alt={item.alt ?? ''}/>);
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <>
+            <img
+                className="image-item"
+                loading="lazy"
+                src={item.src}
+                alt={item.alt ?? ''}
+                onClick={() => setIsOpen(true)}
+            />
+            {isOpen && 
+                <div className="image-modal-wrapper" onClick={() => setIsOpen(false)}>
+                    < img
+                        className="image-modal"
+                        src={item.src}
+                        alt={item.alt ?? ''}
+                    />
+                </div>
+            }
+        </>
+    );
 }
 
 interface ExerciseCardBlockProps {
@@ -168,9 +204,27 @@ function ExerciseCardBlock({item}: ExerciseCardBlockProps) {
 }
 
 interface FooterProps {
-
+    currentPhaseIndex: number;
+    phaseLength: number;
+    canGoNext: boolean;
+    canGoPrevious: boolean;
+    onGoNext: () => void;
+    onGoPrevious: () => void;
 }
 
-function Footer() {
-
+function Footer({
+    currentPhaseIndex,
+    phaseLength,
+    canGoNext,
+    canGoPrevious,
+    onGoNext,
+    onGoPrevious
+}: FooterProps) {
+    return (
+        <div className="footer-container">
+            <button className="phase-change-button previous" disabled={!canGoPrevious} onClick={onGoPrevious}>前へ</button>
+            <div className="phase-page-index">{currentPhaseIndex + 1} / {phaseLength}</div>
+            <button className="phase-change-button next" disabled={!canGoNext} onClick={onGoNext}>次へ</button>
+        </div>
+    );
 }

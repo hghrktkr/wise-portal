@@ -165,12 +165,75 @@
     color: rgb(31, 30, 30);
 }
 
+.text-item h2 {
+    padding-bottom: 0.5em;
+    font-weight: 600;
+}
+
+.text-item ul {
+    list-style: disc;
+    padding-left: 1.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    margin: 0.8em, 0;
+}
+
 .image-item {
     flex: 1;
     margin: 1%;
     max-width: 70%;
     max-height: 70dvh;
     align-self: center;
+    cursor: zoom-in;
+}
+
+.image-modal-wrapper {
+    position: fixed;
+    background-color: rgba(255, 255, 255, 0.7);
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    cursor: zoom-out;
+}
+
+.image-modal {
+    max-width: 90dvw;
+    max-height: 90dvh;
+    object-fit: contain;
+}
+
+.footer-container {
+    height: 5dvh;
+    min-height: 40px;
+    background-color: rgb(231, 231, 231);
+    padding-left: 1%;
+    padding-right: 1%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.phase-change-button {
+    width: 60px;
+    height: 80%;
+    border-radius: 30%;
+    background-color: cornflowerblue;
+}
+
+.phase-change-button:disabled {
+    background-color: rgb(175, 175, 175);
+}
+
+.phase-page-index {
+    padding-left: 1%;
+    padding-right: 1%;
+    margin: 1rem;
+    font-size: clamp(1rem, 1vw, 2rem);
+    font-family: 'M PLUS Rounded 1c';
+    font-weight: 400;
+    color: black;
 }
 
 @media (max-width: 767px) {
