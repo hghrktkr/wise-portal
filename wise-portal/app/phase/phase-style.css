@@ -1,5 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap');
 
+.phase-page {
+    background-color: rgb(226, 217, 203);
+    font-family: 'M PLUS Rounded 1c';
+    font-weight: 400;
+    color: rgb(31, 30, 30);
+}
+
 .header-container {
     position: sticky;
     top: 0;
@@ -124,7 +131,7 @@
     padding-left: 1%;
     padding-right: 1%;
     margin: 1rem;
-    font-size: clamp(1rem, 1vw, 2rem);
+    font-size: clamp(1rem, 2vw, 2rem);
     font-family: 'M PLUS Rounded 1c';
     font-weight: 400;
 }
@@ -165,6 +172,12 @@
     color: rgb(31, 30, 30);
 }
 
+.text-item h1 {
+    font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+    padding-bottom: 0.5em;
+    font-weight: 800;
+}
+
 .text-item h2 {
     padding-bottom: 0.5em;
     font-weight: 600;
@@ -183,6 +196,7 @@
     margin: 1%;
     max-width: 70%;
     max-height: 70dvh;
+    object-fit: contain;
     align-self: center;
     cursor: zoom-in;
 }

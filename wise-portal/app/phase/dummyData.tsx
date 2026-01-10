@@ -34,10 +34,14 @@ export interface ImageBlock {
 export interface ExerciseBlock {
     id: string;
     kind: 'exercise';
-    question: string; // MarkDown
-    choices: { id: string, label: string}[];
+    question: Question[];
+}
+
+interface Question {
+    questionSentence?: string;   // Markdown
+    choices: {id: string, label: string}[];
+    answer: string[];
     answerType: 'single' | 'multiple';
-    correctAnswer: string | string[];
 }
 
 export type ContentBlock = TextBlock | ImageBlock | ExerciseBlock;
@@ -201,40 +205,133 @@ export const DUMMY_LESSON: LessonData = {
             orderIndex: 2,
             contents: [
                 {
-                    id: 'content_i4',
+                    id: 'content_i7',
                     body: [
+                        {
+                            id: 'lesson1-phase2-content1-image1',
+                            kind: 'image',
+                            src: 'https://vcode-esia.com/images_for_world_data/Basic/Theme3/Lesson10/L10_image01.gif',
+                            alt: 'テスト画像ダミー'
+                        },
                         {
                             id: 'lesson1-phase2-content1-text1',
                             kind: 'text',
-                            value: 'instructionテストデータ1(文面のみ)'
+                            value: `
+# 今回のテーマ
+## カートゲームを作ろう！
+ 
+
+## 今回学習すること
+- 復習：真理値しんりち
+- タイマーの作り方
+                            `
                         }
                     ],
                     needsAnswer: false
                 },
                 {
-                    id: 'content_i5',
+                    id: 'content_i8',
                     body: [
                         {
                             id: 'lesson1-phase2-content2-image1',
                             kind: 'image',
-                            src: '/images/lesson/example.png',
+                            src: 'https://vcode-esia.com/images_for_world_data/Basic/Theme3/Lesson10/L10_image02.png',
+                            alt: 'テスト画像ダミー'
+                        },
+                        {
+                            id: 'lesson1-phase2-content2-text1',
+                            kind: 'text',
+                            value: `
+## カートレースを作ろう！・・・
+
+今回は、これまでに学習したことを復習しながら、レーシングカートで1周のタイムを競うきそゲームを作ろう！
+                            `
+                        },
+                    ],
+                    needsAnswer: false
+                },
+                {
+                    id: 'content_i9',
+                    body: [
+                        {
+                            id: 'lesson1-phase2-content3-text1',
+                            kind: 'text',
+                            value: `
+## 復習：真理値とは・・・
+
+**真理値**とは、変数に入れられるもののひとつで **「はい(真しん)」か「いいえ(偽ぎ)」の状態じょうたいを表すもの** のことです。
+
+今回は、変数スイッチをつくり、プレイヤーがレース中かどうかを調べられるようにしましょう！
+
+- スイッチ = 真：プレイヤーがレース中
+- スイッチ = 偽：プレイヤーがレース中でない
+
+こうすることで、プレイヤーがレース中のときだけ仕組みを動かすことができるようになります！
+                            `
+                        },
+                        {
+                            id: 'lesson1-phase2-content3-image1',
+                            kind: 'image',
+                            src: 'https://vcode-esia.com/images_for_world_data/Basic/Theme3/Lesson10/L10_image03.gif',
                             alt: 'テスト画像ダミー'
                         }
                     ],
                     needsAnswer: false
                 },
                 {
-                    id: 'content_i6',
+                    id: 'content_i10',
                     body: [
                         {
-                            id: 'lesson1-phase2-content3-text1',
+                            id: 'lesson1-phase2-content4-text1',
                             kind: 'text',
-                            value: 'instructionテストデータ1(文面と画像)'
+                            value: `
+## 真理値とループの組み合わせ・・・
+
+真理値を使って、 **ゲーム中だけ仕組みを動かすプログラミング** を見てみましょう！
+
+- チャットコマンドrunを入力したときに、変数スイッチの真理値を真にする
+- チャットコマンドjump、チャットコマンドeffectを実行する
+- 変数スイッチの真理値が真なら、チャットコマンドjump、チャットコマンドeffectをループして実行する
+- レースが終わるときに変数スイッチの真理値を偽にする
+
+こうすることで、レース中だけチャットコマンドを実行することができます！
+                            `
                         },
                         {
-                            id: 'lesson1-phase2-content3-image1',
+                            id: 'lesson1-phase2-content4-image1',
                             kind: 'image',
-                            src: '/images/lesson/example.png',
+                            src: 'https://vcode-esia.com/images_for_world_data/Basic/Theme3/Lesson10/L10_image04.png',
+                            alt: 'テスト画像ダミー'
+                        }
+                    ],
+                    needsAnswer: false
+                },
+                {
+                    id: 'content_i11',
+                    body: [
+                        {
+                            id: 'lesson1-phase2-content5-text1',
+                            kind: 'text',
+                            value: `
+## タイマーの作り方・・・
+
+プログラミングでゲームを作るときに、制限せいげん時間を作ることができるとゲームが面白くなります！
+
+今回のレースゲームでも、レースのタイムを計るようにして、何度も挑戦ちょうせんしたくなるようなゲームにしましょう！
+
+タイマーの仕組みは、 **変数とループを組み合わせる** と作ることができます。
+
+- 変数タイマーを作り、かかった時間を入れられるようにする
+- 1秒(1000ミリ秒)待つ⇒変数タイマーに入った数字を1ふやす
+- 真理値が真のあいだ、ループさせる
+
+プログラムはシンプルですが、いろいろな時に使える仕組みなので、ぜひ覚えておきましょう！
+                            `
+                        },
+                        {
+                            id: 'lesson1-phase2-content5-image1',
+                            kind: 'image',
+                            src: 'https://vcode-esia.com/images_for_world_data/Basic/Theme3/Lesson10/L10_image05.png',
                             alt: 'テスト画像ダミー'
                         }
                     ],
@@ -251,16 +348,30 @@ export const DUMMY_LESSON: LessonData = {
                     id: 'content_e1',
                     body: [
                         {
+                            id: 'lesson1-phase3-content1-image1',
+                            kind: 'image',
+                            src: 'https://k-esia.com/images/4th_lesson5_q1_v100.png',
+                            alt: 'テスト画像ダミー'
+                        },
+                        {
                             id: 'lesson1-phase3-content1-exercise1',
                             kind: 'exercise',
-                            question: 'ダミー問題①(シングル文面のみ)',
-                            choices: [
-                                {id: 'choice_1', label: '選択肢1'},
-                                {id: 'choice_2', label: '選択肢2'},
-                                {id: 'choice_3', label: '選択肢3'}
-                            ],
-                            answerType: 'single',
-                            correctAnswer: 'choice_1'
+                            question: [
+                                {
+                                    questionSentence: `
+左のプログラムを実行してチャットで **run 2** と入力すると、変数 **生き物の数** には何が入りますか？
+                                    `,
+                                    choices: [
+                                        {id: 'choice_1', label: '10'},
+                                        {id: 'choice_2', label: '5'},
+                                        {id: 'choice_3', label: 'アカシアのフェンス'},
+                                        {id: 'choice_4', label: 'トウヒのフェンス'}
+                                    ],
+                                    answer: ['choice_1'],
+                                    answerType: 'single'
+                                },
+                                
+                            ]
                         }
                     ],
                     needsAnswer: true
@@ -269,16 +380,71 @@ export const DUMMY_LESSON: LessonData = {
                     id: 'content_e2',
                     body: [
                         {
+                            id: 'lesson1-phase3-content2-image1',
+                            kind: 'image',
+                            src: 'https://vcode-esia.com/images_for_world_data/Basic/Theme4/Lesson5/L5_image07.png',
+                            alt: 'テスト画像ダミー5'
+                        },
+                        {
                             id: 'lesson1-phase3-content2-exercise1',
                             kind: 'exercise',
-                            question: 'ダミー問題②(複数選択文面のみ)',
-                            choices: [
-                                {id: 'choice_1', label: '選択肢1'},
-                                {id: 'choice_2', label: '選択肢2'},
-                                {id: 'choice_3', label: '選択肢3'}
-                            ],
-                            answerType: 'multiple',
-                            correctAnswer: ['choice_2', 'choice_3']
+                            question: [
+                                {
+                                    questionSentence: `
+変数 **開始位置** の座標を基準(きじゅん)にして、画像のような形の畑をプログラミングで作ろうと思います。
+
+正しいプログラムの流れになるように、下の文の①～④に当てはまる言葉をえらびましょう。
+
+- **①**を東と南に **②** から **③** までならべる
+- **④**を同じ大きさでならべる
+
+①にあてはまる言葉
+                                    `,
+                                    choices: [
+                                        {id: 'choice_1', label: '小麦'},
+                                        {id: 'choice_2', label: '耕地(こうち)'}
+                                    ],
+                                    answer: ['choice_2'],
+                                    answerType: 'single'
+                                },
+                                {
+                                    questionSentence: `
+②にあてはまる言葉
+                                    `,
+                                    choices: [
+                                        {id: 'choice_1', label: '0'},
+                                        {id: 'choice_2', label: '1'},
+                                        {id: 'choice_3', label: '8'},
+                                        {id: 'choice_4', label: '9'}
+                                    ],
+                                    answer: ['choice_2'],
+                                    answerType: 'single'
+                                },
+                                {
+                                    questionSentence: `
+③にあてはまる言葉
+                                    `,
+                                    choices: [
+                                        {id: 'choice_1', label: '0'},
+                                        {id: 'choice_2', label: '1'},
+                                        {id: 'choice_3', label: '8'},
+                                        {id: 'choice_4', label: '9'}
+                                    ],
+                                    answer: ['choice_4'],
+                                    answerType: 'single'
+                                },
+                                                                {
+                                    questionSentence: `
+④にあてはまる言葉
+                                    `,
+                                    choices: [
+                                        {id: 'choice_1', label: '小麦'},
+                                        {id: 'choice_2', label: '耕地(こうち)'}
+                                    ],
+                                    answer: ['choice_1'],
+                                    answerType: 'single'
+                                }
+                            ]
                         }
                     ],
                     needsAnswer: true
@@ -289,20 +455,21 @@ export const DUMMY_LESSON: LessonData = {
                         {
                             id: 'lesson1-phase3-content3-exercise1',
                             kind: 'exercise',
-                            question: 'ダミー問題③(シングル画像あり)',
-                            choices: [
-                                {id: 'choice_1', label: '選択肢1'},
-                                {id: 'choice_2', label: '選択肢2'},
-                                {id: 'choice_3', label: '選択肢3'}
-                            ],
-                            answerType: 'single',
-                            correctAnswer: 'choice_2'
-                        },
-                        {
-                            id: 'lesson1-phase3-content3-image1',
-                            kind: 'image',
-                            src: '/images/lesson/example.png',
-                            alt: 'テスト画像ダミー'
+                            question: [
+                                {
+                                    questionSentence: `
+今回プログラミングでスポーンさせる生き物を **すべて** えらびましょう。
+                                    `,
+                                    choices: [
+                                        {id: 'choice_1', label: 'ウシ'},
+                                        {id: 'choice_2', label: 'ブタ'},
+                                        {id: 'choice_3', label: 'ヤギ'},
+                                        {id: 'choice_4', label: 'ニワトリ'}
+                                    ],
+                                    answer: ['choice_1', 'choice_2', 'choice_4'],
+                                    answerType: 'multiple'
+                                },   
+                            ]
                         }
                     ],
                     needsAnswer: true

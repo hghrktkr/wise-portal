@@ -4,7 +4,6 @@ import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar } from "react-icons/f
 import "./phase-style.css";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 export default function PhasePage() {
     const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
@@ -27,7 +26,7 @@ export default function PhasePage() {
     }
 
     return (
-        <div>
+        <div className="phase-page">
             <PhaseHeader title={DUMMY_LESSON.title} />
 
             <StepBar currentPhaseIndex={currentPhaseIndex} phases={DUMMY_LESSON.phases} phaseLength={phaseLength} />
