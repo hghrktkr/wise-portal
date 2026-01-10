@@ -384,7 +384,7 @@ export const DUMMY_LESSON: LessonData = {
                         {
                             id: 'lesson1-phase3-content2-image1',
                             kind: 'image',
-                            src: 'https://vcode-esia.com/images_for_world_data/Basic/Theme4/Lesson5/L5_image07.png',
+                            src: 'https://vcode-esia.com/images_for_world_data/Basic/Theme4/Lesson5/L5_image06.png',
                             alt: 'テスト画像ダミー5'
                         },
                         {
