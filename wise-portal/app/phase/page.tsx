@@ -2,7 +2,7 @@
 import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, LessonData, PhaseData, Question, TextBlock } from "./dummyData";
 import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar } from "react-icons/fa";
 import "./phase-style.css";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 export default function PhasePage() {
@@ -12,6 +12,18 @@ export default function PhasePage() {
     const phaseLength: number = pageData.phases.length;
     const currentPhaseType: string = currentPhase.type;
     const currentContents: ContentData[] = currentPhase.contents;
+
+    const [userAnswers, setUserAnswers] = useState< Record<string, string[]> >({});
+    const [results, setResults] = useState< Record<string, {isCorrect: boolean}> >({});
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const userAnswersRef = useRef<Record<string, string[]>>({});
+
+    const exerciseBlocks: ExerciseBlock[] = pageData.phases.filter(p => p.type === 'exercise')
+                                                            .flatMap(p => p.contents)
+                                                            .flatMap(c => c.body)
+                                                            .filter(b => b.kind === 'exercise');
+    
+    const questions: Question[] = exerciseBlocks.flatMap(b => b.question);
 
     const canGoNext = (currentPhaseIndex < phaseLength -1) && (currentPhase.type !== 'exercise');
     const canGoPrevious = (currentPhaseIndex > 0) && (currentPhase.type !== 'exercise');
@@ -33,7 +45,7 @@ export default function PhasePage() {
 
             <PhaseDescription description={DUMMY_LESSON.description} />
 
-            <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} />
+            <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} userAnswersRef={userAnswersRef} />
 
             <Footer currentPhaseIndex={currentPhaseIndex} phaseLength={phaseLength} canGoNext={canGoNext} canGoPrevious={canGoPrevious} onGoNext={goNextPhase} onGoPrevious={goPrevPhase}/>
 
@@ -120,9 +132,10 @@ function PhaseDescription({description}: PhaseDescriptionProps) {
 interface CardFieldProps {
     currentPhaseType: string;
     currentContents: ContentData[];
+    userAnswersRef: React.RefObject<Record<string, string[]>>;
 }
 
-function CardField({currentPhaseType, currentContents}: CardFieldProps) {
+function CardField({currentPhaseType, currentContents, userAnswersRef}: CardFieldProps) {
     return (
         <div className="card-field-container">
             {currentContents.map((content) => {
@@ -135,7 +148,7 @@ function CardField({currentPhaseType, currentContents}: CardFieldProps) {
                                 case 'image':
                                     return <ImageCardBlock key={block.id} item={block}/>;
                                 case 'exercise':
-                                    return <ExerciseCardBlock key={block.id} item={block}/>;
+                                    return <ExerciseCardBlock key={block.id} item={block} userAnswersRef={userAnswersRef} />;
                                 default:
                                     return null;
                             }
@@ -192,96 +205,88 @@ function ImageCardBlock({item}: ImageCardBlockProps) {
 
 interface ExerciseCardBlockProps {
     item: ExerciseBlock;
+    userAnswersRef: React.RefObject<Record<string, string[]>>;
 }
 
-function ExerciseCardBlock({item}: ExerciseCardBlockProps) {
-    const [userAnswers, setUserAnswers] = useState< Record<string, string[]> >({});
-    interface QuestionResult {
-        isCorrect: boolean;
-    }
-    const [results, setResults] = useState< Record<string, QuestionResult> >({});
-    const [isSubmitted, setIsSubmitted] = useState(false);
+function ExerciseCardBlock({item, userAnswersRef}: ExerciseCardBlockProps) {
     const question: Question[] = item.question;
-    const unansweredQuestions: Question[] = question.filter(q => {
-        const selected = userAnswers[q.id] ?? [];
-        return selected.length === 0;
-    });
-
-    const updateUserAnswer = (
-        questionId: string,
-        choiceId: string,
-        answerType: 'single' | 'multiple'
-    ) => {
-        setUserAnswers((currentUserAnswers) => {
-            const currentUserAnswer = currentUserAnswers[questionId] ?? [];
-
-            let updatedUserAnswer: string[];
-            switch (answerType) {
-                case 'multiple':
-                    updatedUserAnswer = currentUserAnswer.includes(choiceId)
-                        ? currentUserAnswer.filter(v => v !== choiceId)
-                        : [...currentUserAnswer, choiceId];
-                    break;
-                
-                case 'single':
-                    updatedUserAnswer = currentUserAnswer.includes(choiceId)
-                        ? []
-                        : [choiceId];
-                    break;
-
-                default:
-                    updatedUserAnswer = [];
-                    break;
-            }
-
-            return {
-                ... currentUserAnswers,
-                [questionId]: updatedUserAnswer
-            }
-        });
-    };
 
     return (
-        <>
-            <div className="exercise-item" key={item.id}>
+        <div className="exercise-item" key={item.id}>
+            {
+                question.map((question) => {
+                    return (
+                        <ExerciseQuestion key={question.id} question={question} userAnswersRef={userAnswersRef} />
+                    )
+                })
+            }
+        </div>
+    );
+}
+
+interface ExerciseQuestionProps {
+    question: Question;
+    userAnswersRef: React.RefObject<Record<string, string[]>>;
+}
+
+function ExerciseQuestion({question, userAnswersRef}: ExerciseQuestionProps) {
+    const id: string = question.id;
+    const sentence: undefined | string = question.questionSentence;
+    const answerType: 'single' | 'multiple' = question.answerType;
+    const currentAnswersRef: string[] = userAnswersRef.current[id] ?? [];
+    const [currentAnswers, setCurrentAnswers] = useState<string[]>(currentAnswersRef);
+
+    const handleUserChoices = (choiceId: string) => {
+        let updatedAnswers: string[];
+
+        switch (answerType) {
+            case 'multiple':
+                updatedAnswers = currentAnswers.includes(choiceId)
+                    ? currentAnswers.filter(a => a !== choiceId)
+                    : [... currentAnswers, choiceId];
+                break;
+            
+            case 'single':
+                updatedAnswers = currentAnswers.includes(choiceId)
+                    ? []
+                    : [choiceId];
+                break;
+        
+            default:
+                updatedAnswers = [];
+                break;
+        }
+
+        setCurrentAnswers(updatedAnswers);
+        userAnswersRef.current[id] = updatedAnswers;
+    }
+
+    return (
+        <div className="question" key={id}>
+            <ReactMarkdown>{sentence ?? ''}</ReactMarkdown>
+            <ul className="question-choices">
                 {
-                    question.map((value) => {
-                        const answerType = value.answerType;
-                        const questionId: string = value.id;
-                        const questionAnswers: string[] = value.answer;
+                    question.choices.map(({id, label}) => {
+                        const choiceId = id;
 
                         return (
-                            <div className="question" key={questionId}>
-                                <ReactMarkdown>{value.questionSentence?? ''}</ReactMarkdown>
-                                <ul className="question-choices" key={questionId}>
-                                    {
-                                        value.choices.map(({id, label}) => {
-                                            const choiceId = id;
-
-                                            return (
-                                                <li key={choiceId}>
-                                                    <label>
-                                                        <input 
-                                                            type={'checkbox'}
-                                                            name={choiceId}
-                                                            checked={(userAnswers[questionId]?? []).includes(choiceId)}
-                                                            onChange={() => updateUserAnswer(questionId, choiceId, answerType)}
-                                                        />
-                                                        {label}
-                                                    </label>
-                                                </li>
-                                            )
-                                        })
-                                    }
-                                </ul>
-                            </div>
+                            <li key={choiceId}>
+                                <label>
+                                    <input 
+                                        type={'checkbox'}
+                                        name={choiceId}
+                                        checked={currentAnswers.includes(choiceId)}
+                                        onChange={() => handleUserChoices(choiceId)}
+                                    />
+                                    {label}
+                                </label>
+                            </li>
                         )
                     })
                 }
-            </div>
-            
-        </>
-    );
+            </ul>
+        </div>
+    )
 }
 
 interface ExerciseSubmitBarProps {
