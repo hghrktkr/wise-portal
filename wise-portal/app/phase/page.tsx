@@ -2,31 +2,82 @@
 import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, LessonData, PhaseData, Question, TextBlock } from "./dummyData";
 import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar } from "react-icons/fa";
 import "./phase-style.css";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 
 export default function PhasePage() {
+    // フェーズ管理・ページ表示関係
     const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
     const pageData: LessonData = DUMMY_LESSON;
     const currentPhase: PhaseData = pageData.phases[currentPhaseIndex];
     const phaseLength: number = pageData.phases.length;
-    const currentPhaseType: string = currentPhase.type;
+    const currentPhaseType: 'instruction' | 'exercise' | 'feedback' = currentPhase.type;
     const currentContents: ContentData[] = currentPhase.contents;
 
-    const [userAnswers, setUserAnswers] = useState< Record<string, string[]> >({});
+
+
+    // Exercise採点関係
     const [results, setResults] = useState< Record<string, {isCorrect: boolean}> >({});
     const [isSubmitted, setIsSubmitted] = useState(false);
     const userAnswersRef = useRef<Record<string, string[]>>({});
-
     const exerciseBlocks: ExerciseBlock[] = pageData.phases.filter(p => p.type === 'exercise')
                                                             .flatMap(p => p.contents)
                                                             .flatMap(c => c.body)
                                                             .filter(b => b.kind === 'exercise');
-    
     const questions: Question[] = exerciseBlocks.flatMap(b => b.question);
+    const unansweredIds: string[] = questions.filter(q => (userAnswersRef.current[q.id] ?? []).length === 0)
+                                                .map(q => q.id);
+    const unAnsweredCount: number = unansweredIds.length;
 
-    const canGoNext = (currentPhaseIndex < phaseLength -1) && (currentPhase.type !== 'exercise');
-    const canGoPrevious = (currentPhaseIndex > 0) && (currentPhase.type !== 'exercise');
+    const handleResults = () => {
+        const updatedResults: Record<string, {isCorrect: boolean}> = {};
+        
+        questions.forEach(q => {
+            const userAnswer: string[] = userAnswersRef.current[q.id] ?? [];
+            const isCorrect = q.answer.length === userAnswer.length &&
+            q.answer.every(a => userAnswer.includes(a));
+            
+            updatedResults[q.id] = {isCorrect: isCorrect};
+        });
+        setResults(updatedResults);
+    }
+
+    const handleSubmit = () => {
+        handleResults();
+        setIsSubmitted(true);
+    }
+
+    const isPerfect: boolean = isSubmitted && unAnsweredCount === 0 && Object.values(results).every(r => r.isCorrect);
+
+    useEffect(() => {
+    console.log('userAnswersRef', userAnswersRef.current);
+    }, [isSubmitted]);
+
+    useEffect(() => {
+    console.log('results', results);
+    }, [results]);
+
+    useEffect(() => {
+    console.log('unAnsweredCount', unAnsweredCount);
+    }, [unAnsweredCount]);
+
+    useEffect(() => {
+    console.log('isPerfect', isPerfect);
+    }, [isPerfect]);
+    
+    useEffect(() => {
+    console.log('isSubmitted', isSubmitted);
+    }, [isSubmitted]);
+
+
+
+    // Footerボタン制御関係
+    const canGoNext = (currentPhase.type !== 'exercise')
+                        ? (currentPhaseIndex < phaseLength -1)
+                        : (isSubmitted && isPerfect);
+    const canGoPrevious = (currentPhase.type !== 'exercise')
+                        ? (currentPhaseIndex > 0)
+                        : (isSubmitted);
 
 
     const goNextPhase = () => {
@@ -46,6 +97,8 @@ export default function PhasePage() {
             <PhaseDescription description={DUMMY_LESSON.description} />
 
             <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} userAnswersRef={userAnswersRef} />
+
+            {currentPhaseType === 'exercise' && <ExerciseSubmitBar questions={questions} isPerfect={isPerfect} isSubmitted={isSubmitted} onSubmit={handleSubmit} unAnsweredCount={unAnsweredCount} />}
 
             <Footer currentPhaseIndex={currentPhaseIndex} phaseLength={phaseLength} canGoNext={canGoNext} canGoPrevious={canGoPrevious} onGoNext={goNextPhase} onGoPrevious={goPrevPhase}/>
 
@@ -290,14 +343,14 @@ function ExerciseQuestion({question, userAnswersRef}: ExerciseQuestionProps) {
 }
 
 interface ExerciseSubmitBarProps {
+    questions: Question[];
     isSubmitted: boolean;
     unAnsweredCount: number;
     isPerfect: boolean;
     onSubmit: () => void;
-    onRetry: () => void;
 }
 
-function ExerciseSubmitBar({isSubmitted, unAnsweredCount, isPerfect, onSubmit, onRetry}: ExerciseSubmitBarProps) {
+function ExerciseSubmitBar({questions, isSubmitted, unAnsweredCount, isPerfect, onSubmit}: ExerciseSubmitBarProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
@@ -309,7 +362,10 @@ function ExerciseSubmitBar({isSubmitted, unAnsweredCount, isPerfect, onSubmit, o
                         <div className="exercise-modal-warning">{`未回答の問題が${unAnsweredCount}問あります`}</div>
                     )}
                     <div className="exercise-modal-check">回答を提出しますか？</div>
-                    <div className="submit-button submit">回答を送信する</div>
+                    <div className="exercise-modal-button">
+                        <button className="button-yes" onClick={onSubmit} >回答を提出する</button>
+                        <button className="button-no" onClick={() => setIsModalOpen(false)} >キャンセル</button>
+                    </div>
                 </div>
             }
         </div>
