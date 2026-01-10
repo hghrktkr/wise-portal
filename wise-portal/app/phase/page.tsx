@@ -1,5 +1,5 @@
 'use client';
-import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, LessonData, PhaseData, TextBlock } from "./dummyData";
+import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, LessonData, PhaseData, Question, TextBlock } from "./dummyData";
 import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar } from "react-icons/fa";
 import "./phase-style.css";
 import { useState } from "react";
@@ -196,46 +196,116 @@ interface ExerciseCardBlockProps {
 
 function ExerciseCardBlock({item}: ExerciseCardBlockProps) {
     const [userAnswers, setUserAnswers] = useState< Record<string, string[]> >({});
-    const question = item.question;
+    interface QuestionResult {
+        isCorrect: boolean;
+    }
+    const [results, setResults] = useState< Record<string, QuestionResult> >({});
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const question: Question[] = item.question;
+    const unansweredQuestions: Question[] = question.filter(q => {
+        const selected = userAnswers[q.id] ?? [];
+        return selected.length === 0;
+    });
 
-    const addUserAnswer = (questionId: string, userAnswer: string) => {
+    const updateUserAnswer = (
+        questionId: string,
+        choiceId: string,
+        answerType: 'single' | 'multiple'
+    ) => {
+        setUserAnswers((currentUserAnswers) => {
+            const currentUserAnswer = currentUserAnswers[questionId] ?? [];
 
+            let updatedUserAnswer: string[];
+            switch (answerType) {
+                case 'multiple':
+                    updatedUserAnswer = currentUserAnswer.includes(choiceId)
+                        ? currentUserAnswer.filter(v => v !== choiceId)
+                        : [...currentUserAnswer, choiceId];
+                    break;
+                
+                case 'single':
+                    updatedUserAnswer = currentUserAnswer.includes(choiceId)
+                        ? []
+                        : [choiceId];
+                    break;
+
+                default:
+                    updatedUserAnswer = [];
+                    break;
+            }
+
+            return {
+                ... currentUserAnswers,
+                [questionId]: updatedUserAnswer
+            }
+        });
     };
 
     return (
-        <div className="exercise-block-wrapper" key={item.id}>
-            {
-                question.map((value) => {
-                    const type = value.answerType;  // 今は使わない
-                    const questionId = value.id;
-                    const questionAnswer = value.answer;
+        <>
+            <div className="exercise-item" key={item.id}>
+                {
+                    question.map((value) => {
+                        const answerType = value.answerType;
+                        const questionId: string = value.id;
+                        const questionAnswers: string[] = value.answer;
 
-                    return (
-                        <div className="question-wrapper" key={questionId}>
-                            <ReactMarkdown>{value.questionSentence?? ''}</ReactMarkdown>
-                            <ul className="question-choices" key={questionId}>
-                                {
-                                    value.choices.map(({id, label}) => {
-                                        const choiceId = id;
+                        return (
+                            <div className="question" key={questionId}>
+                                <ReactMarkdown>{value.questionSentence?? ''}</ReactMarkdown>
+                                <ul className="question-choices" key={questionId}>
+                                    {
+                                        value.choices.map(({id, label}) => {
+                                            const choiceId = id;
 
-                                        return (
-                                            <li key={choiceId}>
-                                                <label>
-                                                    <input 
-                                                        type={'checkbox'}
-                                                        name={choiceId}
-                                                        onChange={() => addUserAnswer(questionId, choiceId)}
-                                                    />
-                                                    {label}
-                                                </label>
-                                            </li>
-                                        )
-                                    })
-                                }
-                            </ul>
-                        </div>
-                    )
-                })
+                                            return (
+                                                <li key={choiceId}>
+                                                    <label>
+                                                        <input 
+                                                            type={'checkbox'}
+                                                            name={choiceId}
+                                                            checked={(userAnswers[questionId]?? []).includes(choiceId)}
+                                                            onChange={() => updateUserAnswer(questionId, choiceId, answerType)}
+                                                        />
+                                                        {label}
+                                                    </label>
+                                                </li>
+                                            )
+                                        })
+                                    }
+                                </ul>
+                            </div>
+                        )
+                    })
+                }
+            </div>
+            
+        </>
+    );
+}
+
+interface ExerciseSubmitBarProps {
+    isSubmitted: boolean;
+    unAnsweredCount: number;
+    isPerfect: boolean;
+    onSubmit: () => void;
+    onRetry: () => void;
+}
+
+function ExerciseSubmitBar({isSubmitted, unAnsweredCount, isPerfect, onSubmit, onRetry}: ExerciseSubmitBarProps) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    return (
+        <div className="submit-bar-container">
+            <button className="submit-button check" onClick={() => setIsModalOpen(true)}>回答する</button>
+            {isModalOpen && 
+                <div className="exercise-modal-wrapper">
+                    {(unAnsweredCount > 0 &&
+                        <div className="exercise-modal-warning">{`未回答の問題が${unAnsweredCount}問あります`}</div>
+                    )}
+                    <div className="exercise-modal-check">回答を提出しますか？</div>
+                    <div className="submit-button submit">回答を送信する</div>
+                </div>
             }
         </div>
     );

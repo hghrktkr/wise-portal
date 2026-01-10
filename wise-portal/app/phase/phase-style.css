@@ -153,7 +153,7 @@
 }
 
 .card-wrapper.exercise {
-    background-color: coral;
+    background-color: rgb(255, 174, 145);
     border-color: rgb(221, 92, 44);
 }
 
@@ -216,6 +216,47 @@
     max-width: 90dvw;
     max-height: 90dvh;
     object-fit: contain;
+}
+
+.exercise-item {
+    flex: 1;
+    margin: 1%;
+    font-family: 'M PLUS Rounded 1c';
+    font-weight: 400;
+    font-size: clamp(1rem, 2vw, 2rem);
+    line-height: 1.7;
+    color: rgb(31, 30, 30);
+}
+
+.question h1 {
+    font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+    padding-bottom: 0.5em;
+    font-weight: 800;
+}
+
+.question h2 {
+    padding-bottom: 0.5em;
+    font-weight: 600;
+}
+
+.question ul {
+    list-style: disc;
+    padding-left: 1.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    margin: 0.8em, 0;
+}
+
+.question ul.question-choices {
+    list-style: none;
+}
+
+.submit-button {
+    margin: 2dvh, 0, 2dvh, 0;
+    padding: 1%;
+    font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+    background-color: chocolate;
+    border-radius: 20%;
 }
 
 .footer-container {

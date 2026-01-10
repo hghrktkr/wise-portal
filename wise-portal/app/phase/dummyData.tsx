@@ -37,7 +37,7 @@ export interface ExerciseBlock {
     question: Question[];
 }
 
-interface Question {
+export interface Question {
     id: string;
     questionSentence?: string;   // Markdown
     choices: {id: string, label: string}[];
