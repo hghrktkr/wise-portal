@@ -195,11 +195,50 @@ interface ExerciseCardBlockProps {
 }
 
 function ExerciseCardBlock({item}: ExerciseCardBlockProps) {
+    const [userAnswers, setUserAnswers] = useState< Record<string, string[]> >({});
+    const question = item.question;
+
+    const addUserAnswer = (questionId: string, userAnswer: string) => {
+
+    };
+
     return (
-        <div className="exercise-block-wrapper">
-            <div className="question">{item.question}</div>
+        <div className="exercise-block-wrapper" key={item.id}>
+            {
+                question.map((value) => {
+                    const type = value.answerType;  // 今は使わない
+                    const questionId = value.id;
+                    const questionAnswer = value.answer;
+
+                    return (
+                        <div className="question-wrapper" key={questionId}>
+                            <ReactMarkdown>{value.questionSentence?? ''}</ReactMarkdown>
+                            <ul className="question-choices" key={questionId}>
+                                {
+                                    value.choices.map(({id, label}) => {
+                                        const choiceId = id;
+
+                                        return (
+                                            <li key={choiceId}>
+                                                <label>
+                                                    <input 
+                                                        type={'checkbox'}
+                                                        name={choiceId}
+                                                        onChange={() => addUserAnswer(questionId, choiceId)}
+                                                    />
+                                                    {label}
+                                                </label>
+                                            </li>
+                                        )
+                                    })
+                                }
+                            </ul>
+                        </div>
+                    )
+                })
+            }
         </div>
-    )
+    );
 }
 
 interface FooterProps {

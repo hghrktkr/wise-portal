@@ -38,6 +38,7 @@ export interface ExerciseBlock {
 }
 
 interface Question {
+    id: string;
     questionSentence?: string;   // Markdown
     choices: {id: string, label: string}[];
     answer: string[];
@@ -358,6 +359,7 @@ export const DUMMY_LESSON: LessonData = {
                             kind: 'exercise',
                             question: [
                                 {
+                                    id: 'e1-q1',
                                     questionSentence: `
 左のプログラムを実行してチャットで **run 2** と入力すると、変数 **生き物の数** には何が入りますか？
                                     `,
@@ -390,6 +392,7 @@ export const DUMMY_LESSON: LessonData = {
                             kind: 'exercise',
                             question: [
                                 {
+                                    id: 'e2-q1',
                                     questionSentence: `
 変数 **開始位置** の座標を基準(きじゅん)にして、画像のような形の畑をプログラミングで作ろうと思います。
 
@@ -408,6 +411,7 @@ export const DUMMY_LESSON: LessonData = {
                                     answerType: 'single'
                                 },
                                 {
+                                    id: 'e2-q2',
                                     questionSentence: `
 ②にあてはまる言葉
                                     `,
@@ -421,6 +425,7 @@ export const DUMMY_LESSON: LessonData = {
                                     answerType: 'single'
                                 },
                                 {
+                                    id: 'e2-q3',
                                     questionSentence: `
 ③にあてはまる言葉
                                     `,
@@ -433,7 +438,8 @@ export const DUMMY_LESSON: LessonData = {
                                     answer: ['choice_4'],
                                     answerType: 'single'
                                 },
-                                                                {
+                                {
+                                    id: 'e2-q4',
                                     questionSentence: `
 ④にあてはまる言葉
                                     `,
@@ -457,6 +463,7 @@ export const DUMMY_LESSON: LessonData = {
                             kind: 'exercise',
                             question: [
                                 {
+                                    id: 'e3-q1',
                                     questionSentence: `
 今回プログラミングでスポーンさせる生き物を **すべて** えらびましょう。
                                     `,
