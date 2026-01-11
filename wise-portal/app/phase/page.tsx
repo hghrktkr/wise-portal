@@ -2,18 +2,25 @@
 import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, LessonData, PhaseData, Question, TextBlock } from "./dummyData";
 import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar } from "react-icons/fa";
 import "./phase-style.css";
-import { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 
 export default function PhasePage() {
     // フェーズ管理・ページ表示関係
     const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+    const scrollToTopRef = useRef<HTMLDivElement>(null);
     const pageData: LessonData = DUMMY_LESSON;
     const currentPhase: PhaseData = pageData.phases[currentPhaseIndex];
     const phaseLength: number = pageData.phases.length;
     const currentPhaseType: 'instruction' | 'exercise' | 'feedback' = currentPhase.type;
     const currentContents: ContentData[] = currentPhase.contents;
 
+    const handleScrollToTopRef = () => {
+        scrollToTopRef!.current!.scrollIntoView({
+            behavior: "instant",
+            block: "nearest"
+        });
+    }
 
 
     // Exercise採点関係
@@ -52,6 +59,7 @@ export default function PhasePage() {
 
     const isPerfect: boolean = isSubmitted && unAnsweredCount === 0 && Object.values(results).every(r => r.isCorrect);
 
+    // 監視用
     useEffect(() => {
     console.log('userAnswersRef', userAnswersRef.current);
     }, [isSubmitted]);
@@ -67,11 +75,6 @@ export default function PhasePage() {
     useEffect(() => {
     console.log('isPerfect', isPerfect);
     }, [isPerfect]);
-    
-    useEffect(() => {
-    console.log('isSubmitted', isSubmitted);
-    }, [isSubmitted]);
-
 
 
     // Footerボタン制御関係
@@ -97,13 +100,13 @@ export default function PhasePage() {
 
             <StepBar currentPhaseIndex={currentPhaseIndex} phases={DUMMY_LESSON.phases} phaseLength={phaseLength} />
 
-            <PhaseDescription description={DUMMY_LESSON.description} />
+            <PhaseDescription description={DUMMY_LESSON.description} ref={scrollToTopRef} />
 
             <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} userAnswersRef={userAnswersRef} />
 
             {currentPhaseType === 'exercise' && <ExerciseSubmitBar questions={questions} isPerfect={isPerfect} isSubmitted={isSubmitted} onSubmit={handleSubmit} unAnsweredCount={unAnsweredCount} onExerciseFinished={handleUnanswerdCount} />}
 
-            <Footer currentPhaseIndex={currentPhaseIndex} phaseLength={phaseLength} canGoNext={canGoNext} canGoPrevious={canGoPrevious} onGoNext={goNextPhase} onGoPrevious={goPrevPhase}/>
+            <Footer currentPhaseIndex={currentPhaseIndex} phaseLength={phaseLength} canGoNext={canGoNext} canGoPrevious={canGoPrevious} onGoNext={() => {goNextPhase(); handleScrollToTopRef()}} onGoPrevious={goPrevPhase}/>
 
         </div>
     );
@@ -175,11 +178,12 @@ function StepBar({currentPhaseIndex, phases, phaseLength}: StepBarProps) {
 
 interface PhaseDescriptionProps {
     description: string;
+    ref: React.Ref<HTMLDivElement>;
 }
 
-function PhaseDescription({description}: PhaseDescriptionProps) {
+function PhaseDescription({description, ref}: PhaseDescriptionProps) {
     return (
-        <div className="description-container">
+        <div className="description-container" ref={ref} >
             <div className="description">{description}</div>
         </div>
     );
