@@ -1,6 +1,6 @@
 'use client';
 import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, LessonData, PhaseData, Question, TextBlock } from "./dummyData";
-import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar } from "react-icons/fa";
+import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar, FaExclamationTriangle } from "react-icons/fa";
 import "./phase-style.css";
 import React, { useRef, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
@@ -365,14 +365,19 @@ function ExerciseSubmitBar({questions, isSubmitted, unAnsweredCount, isPerfect, 
         <div className="submit-bar-container">
             <button className="submit-button check" onClick={() => {setIsModalOpen(true); onExerciseFinished();}}>回答する</button>
             {isModalOpen && 
-                <div className="exercise-modal-wrapper">
-                    {(unAnsweredCount > 0 &&
-                        <div className="exercise-modal-warning">{`未回答の問題が${unAnsweredCount}問あります`}</div>
-                    )}
-                    <div className="exercise-modal-check">回答を提出しますか？</div>
-                    <div className="exercise-modal-button">
-                        <button className="button-yes" onClick={onSubmit} >回答を提出する</button>
-                        <button className="button-no" onClick={() => setIsModalOpen(false)} >キャンセル</button>
+                <div className="exercise-modal-background">
+                    <div className="exercise-modal-wrapper">
+                        {(unAnsweredCount > 0 &&
+                            <div className="exercise-modal-warning">
+                                <FaExclamationTriangle />
+                                <p>{`未回答の問題が${unAnsweredCount}問あります`}</p>
+                            </div>
+                        )}
+                        <div className="exercise-modal-check">回答を提出しますか？</div>
+                        <div className="exercise-modal-button">
+                            <button className="button-yes" onClick={onSubmit} >回答を提出する</button>
+                            <button className="button-no" onClick={() => setIsModalOpen(false)} >キャンセル</button>
+                        </div>
                     </div>
                 </div>
             }

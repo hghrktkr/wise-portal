@@ -251,13 +251,86 @@
     list-style: none;
 }
 
-.submit-button {
-    margin: 2dvh, 0, 2dvh, 0;
-    padding: 1%;
-    font-size: clamp(1.5rem, 2.5vw, 2.5rem);
-    background-color: chocolate;
-    border-radius: 20%;
+.submit-bar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
+.submit-button {
+    margin-bottom: 1%;
+    padding: 0.5dvw 1dvw;
+    font-size: clamp(1.5rem, 2vw, 2.5rem);
+    font-weight: 400;
+    color: white;
+    background-color: chocolate;
+    border-radius: 15px;
+}
+
+.exercise-modal-background {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.7);
+    inset: 0;
+    z-index: 1;
+}
+
+.exercise-modal-wrapper {
+    background-color: rgb(241, 241, 241);
+    border: solid gray;
+    padding: 2dvw;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 1;
+    font-family: 'M PLUS Rounded 1c';
+    font-weight: 400;
+    font-size: clamp(1rem, 2vw, 2rem);
+    white-space: nowrap;
+}
+
+.exercise-modal-warning {
+    display: flex;
+    color: crimson;
+    font-weight: 600;
+    margin: 1%;
+
+}
+
+.exercise-modal-button {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.exercise-modal-button button {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 16px;
+    font-size: 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.button-yes {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+}
+
+.button-no {
+    background-color: #e0e0e0;
+    color: #333;
+    border: none;
+}
+
 
 .footer-container {
     height: 5dvh;
@@ -273,7 +346,7 @@
 .phase-change-button {
     width: 60px;
     height: 80%;
-    border-radius: 30%;
+    border-radius: 10px;
     background-color: cornflowerblue;
 }
 
