@@ -18,16 +18,19 @@ export default function PhasePage() {
 
     // Exercise採点関係
     const [results, setResults] = useState< Record<string, {isCorrect: boolean}> >({});
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState< boolean >(false);
+    const [unAnsweredCount, setUnansweredCount] = useState< number >(0);
     const userAnswersRef = useRef<Record<string, string[]>>({});
     const exerciseBlocks: ExerciseBlock[] = pageData.phases.filter(p => p.type === 'exercise')
                                                             .flatMap(p => p.contents)
                                                             .flatMap(c => c.body)
                                                             .filter(b => b.kind === 'exercise');
     const questions: Question[] = exerciseBlocks.flatMap(b => b.question);
-    const unansweredIds: string[] = questions.filter(q => (userAnswersRef.current[q.id] ?? []).length === 0)
-                                                .map(q => q.id);
-    const unAnsweredCount: number = unansweredIds.length;
+
+    const handleUnanswerdCount = () => {
+        const updatedUnAnsweredCount: number = questions.filter(q => (userAnswersRef.current[q.id] ?? []).length === 0).map(q => q.id).length;
+        setUnansweredCount(updatedUnAnsweredCount);
+    }
 
     const handleResults = () => {
         const updatedResults: Record<string, {isCorrect: boolean}> = {};
@@ -98,7 +101,7 @@ export default function PhasePage() {
 
             <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} userAnswersRef={userAnswersRef} />
 
-            {currentPhaseType === 'exercise' && <ExerciseSubmitBar questions={questions} isPerfect={isPerfect} isSubmitted={isSubmitted} onSubmit={handleSubmit} unAnsweredCount={unAnsweredCount} />}
+            {currentPhaseType === 'exercise' && <ExerciseSubmitBar questions={questions} isPerfect={isPerfect} isSubmitted={isSubmitted} onSubmit={handleSubmit} unAnsweredCount={unAnsweredCount} onExerciseFinished={handleUnanswerdCount} />}
 
             <Footer currentPhaseIndex={currentPhaseIndex} phaseLength={phaseLength} canGoNext={canGoNext} canGoPrevious={canGoPrevious} onGoNext={goNextPhase} onGoPrevious={goPrevPhase}/>
 
@@ -348,14 +351,15 @@ interface ExerciseSubmitBarProps {
     unAnsweredCount: number;
     isPerfect: boolean;
     onSubmit: () => void;
+    onExerciseFinished: () => void;
 }
 
-function ExerciseSubmitBar({questions, isSubmitted, unAnsweredCount, isPerfect, onSubmit}: ExerciseSubmitBarProps) {
+function ExerciseSubmitBar({questions, isSubmitted, unAnsweredCount, isPerfect, onSubmit, onExerciseFinished}: ExerciseSubmitBarProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
         <div className="submit-bar-container">
-            <button className="submit-button check" onClick={() => setIsModalOpen(true)}>回答する</button>
+            <button className="submit-button check" onClick={() => {setIsModalOpen(true); onExerciseFinished();}}>回答する</button>
             {isModalOpen && 
                 <div className="exercise-modal-wrapper">
                     {(unAnsweredCount > 0 &&
