@@ -27,7 +27,7 @@ export default function PhasePage() {
 
 
     // ----- Exercise採点関係 -----
-
+    
     const [results, setResults] = useState< Record<string, {isCorrect: boolean}> >({});
     const [isSubmitted, setIsSubmitted] = useState< boolean >(false);
     const [unAnsweredCount, setUnansweredCount] = useState< number >(0);
@@ -218,7 +218,7 @@ function CardField({currentPhaseType, currentContents, userAnswersRef, results, 
     return (
         <div className="card-field-container">
             {currentContents.map((content) => {
-                
+
                 const isExerciseCard = currentPhaseType === 'exercise';
                 let isCorrectCard: boolean = false;
                 if(isExerciseCard && results !== undefined) {
