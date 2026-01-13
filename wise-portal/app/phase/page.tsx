@@ -38,7 +38,7 @@ export default function PhasePage() {
                                                             .filter(b => b.kind === 'exercise');
     const questions: Question[] = exerciseBlocks.flatMap(b => b.question);
 
-    const handleUnanswerdCount = () => {
+    const handleUnansweredCount = () => {
         const updatedUnAnsweredCount: number = questions.filter(q => (userAnswersRef.current[q.id] ?? []).length === 0).map(q => q.id).length;
         setUnansweredCount(updatedUnAnsweredCount);
     }
@@ -113,9 +113,9 @@ export default function PhasePage() {
 
             <PhaseDescription description={DUMMY_LESSON.description} ref={scrollToTopRef} />
 
-            <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} userAnswersRef={userAnswersRef} />
+            <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} userAnswersRef={userAnswersRef} results={results?? {}} isSubmitted={isSubmitted} />
 
-            {currentPhaseType === 'exercise' && <ExerciseSubmitBar questions={questions} isPerfect={isPerfect} isSubmitted={isSubmitted} onSubmit={handleSubmit} unAnsweredCount={unAnsweredCount} onExerciseFinished={handleUnanswerdCount} />}
+            {currentPhaseType === 'exercise' && <ExerciseSubmitBar questions={questions} isPerfect={isPerfect} isSubmitted={isSubmitted} onSubmit={handleSubmit} unAnsweredCount={unAnsweredCount} onExerciseFinished={handleUnansweredCount} />}
 
             <Footer currentPhaseIndex={currentPhaseIndex} phaseLength={phaseLength} canGoNext={canGoNext} canGoPrevious={canGoPrevious} onGoNext={() => {goNextPhase(); handleScrollToTopRef()}} onGoPrevious={goPrevPhase}/>
 
@@ -204,9 +204,11 @@ interface CardFieldProps {
     currentPhaseType: string;
     currentContents: ContentData[];
     userAnswersRef: React.RefObject<Record<string, string[]>>;
+    results?: Record<string, {isCorrect: boolean}>;
+    isSubmitted: boolean;
 }
 
-function CardField({currentPhaseType, currentContents, userAnswersRef}: CardFieldProps) {
+function CardField({currentPhaseType, currentContents, userAnswersRef, results, isSubmitted}: CardFieldProps) {
     return (
         <div className="card-field-container">
             {currentContents.map((content) => {
@@ -219,7 +221,7 @@ function CardField({currentPhaseType, currentContents, userAnswersRef}: CardFiel
                                 case 'image':
                                     return <ImageCardBlock key={block.id} item={block}/>;
                                 case 'exercise':
-                                    return <ExerciseCardBlock key={block.id} item={block} userAnswersRef={userAnswersRef} />;
+                                    return <ExerciseCardBlock key={block.id} item={block} userAnswersRef={userAnswersRef} results={results} isSubmitted={isSubmitted} />;
                                 default:
                                     return null;
                             }
@@ -277,9 +279,11 @@ function ImageCardBlock({item}: ImageCardBlockProps) {
 interface ExerciseCardBlockProps {
     item: ExerciseBlock;
     userAnswersRef: React.RefObject<Record<string, string[]>>;
+    results?: Record<string, {isCorrect: boolean}>;
+    isSubmitted: boolean;
 }
 
-function ExerciseCardBlock({item, userAnswersRef}: ExerciseCardBlockProps) {
+function ExerciseCardBlock({item, userAnswersRef, results, isSubmitted}: ExerciseCardBlockProps) {
     const question: Question[] = item.question;
 
     return (
@@ -287,7 +291,7 @@ function ExerciseCardBlock({item, userAnswersRef}: ExerciseCardBlockProps) {
             {
                 question.map((question) => {
                     return (
-                        <ExerciseQuestion key={question.id} question={question} userAnswersRef={userAnswersRef} />
+                        <ExerciseQuestion key={question.id} question={question} userAnswersRef={userAnswersRef} result={results ? results[question.id] : undefined} isSubmitted={isSubmitted} />
                     )
                 })
             }
@@ -298,9 +302,11 @@ function ExerciseCardBlock({item, userAnswersRef}: ExerciseCardBlockProps) {
 interface ExerciseQuestionProps {
     question: Question;
     userAnswersRef: React.RefObject<Record<string, string[]>>;
+    result: {isCorrect : boolean} | undefined;
+    isSubmitted: boolean;
 }
 
-function ExerciseQuestion({question, userAnswersRef}: ExerciseQuestionProps) {
+function ExerciseQuestion({question, userAnswersRef, result, isSubmitted}: ExerciseQuestionProps) {
     const id: string = question.id;
     const sentence: undefined | string = question.questionSentence;
     const answerType: 'single' | 'multiple' = question.answerType;
