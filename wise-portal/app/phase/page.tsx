@@ -6,7 +6,9 @@ import React, { useRef, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 
 export default function PhasePage() {
-    // フェーズ管理・ページ表示関係
+
+    // ----- フェーズ管理・ページ表示関係 -----
+    
     const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
     const scrollToTopRef = useRef<HTMLDivElement>(null);
     const pageData: LessonData = DUMMY_LESSON;
@@ -23,7 +25,9 @@ export default function PhasePage() {
     }
 
 
-    // Exercise採点関係
+
+    // ----- Exercise採点関係 -----
+
     const [results, setResults] = useState< Record<string, {isCorrect: boolean}> >({});
     const [isSubmitted, setIsSubmitted] = useState< boolean >(false);
     const [unAnsweredCount, setUnansweredCount] = useState< number >(0);
@@ -59,7 +63,9 @@ export default function PhasePage() {
 
     const isPerfect: boolean = isSubmitted && unAnsweredCount === 0 && Object.values(results).every(r => r.isCorrect);
 
-    // 監視用
+
+
+    // ----- 監視用(あとで消す) -----
     useEffect(() => {
     console.log('userAnswersRef', userAnswersRef.current);
     }, [isSubmitted]);
@@ -77,7 +83,8 @@ export default function PhasePage() {
     }, [isPerfect]);
 
 
-    // Footerボタン制御関係
+    // ----- Footerボタン制御関係 -----
+
     const canGoNext = (currentPhase.type !== 'exercise')
                         ? (currentPhaseIndex < phaseLength -1)
                         : (isSubmitted && isPerfect);
@@ -93,6 +100,10 @@ export default function PhasePage() {
     const goPrevPhase = () => {
         if(canGoPrevious) setCurrentPhaseIndex(Math.max(0, currentPhaseIndex - 1));
     }
+
+
+
+    // ----- ここから各ブロック -----
 
     return (
         <div className="phase-page">
