@@ -261,6 +261,12 @@
     list-style: none;
 }
 
+.question-choices input {
+    width: clamp(1rem, 2dvw, 2rem);
+    height: clamp(1rem, 2dvh, 2rem);
+    cursor: pointer;
+}
+
 .question-result {
     margin: 1% 0 0 0;
     display: flex;

@@ -32,21 +32,22 @@ export default function PhasePage() {
     const [isSubmitted, setIsSubmitted] = useState< boolean >(false);
     const [unAnsweredCount, setUnansweredCount] = useState< number >(0);
     const userAnswersRef = useRef<Record<string, string[]>>({});
-    const exerciseBlocks: ExerciseBlock[] = pageData.phases.filter(p => p.type === 'exercise')
-                                                            .flatMap(p => p.contents)
-                                                            .flatMap(c => c.body)
-                                                            .filter(b => b.kind === 'exercise');
-    const questions: Question[] = exerciseBlocks.flatMap(b => b.question);
+    const currentExerciseBlocks: ExerciseBlock[] = currentPhase.type === 'exercise'
+                                                                ? currentPhase.contents
+                                                                .flatMap(c => c.body)
+                                                                .filter(b => b.kind === 'exercise')
+                                                                : [];
+    const currentQuestions: Question[] = currentExerciseBlocks.flatMap(b => b.question);
 
     const handleUnansweredCount = () => {
-        const updatedUnAnsweredCount: number = questions.filter(q => (userAnswersRef.current[q.id] ?? []).length === 0).map(q => q.id).length;
+        const updatedUnAnsweredCount: number = currentQuestions.filter(q => (userAnswersRef.current[q.id] ?? []).length === 0).map(q => q.id).length;
         setUnansweredCount(updatedUnAnsweredCount);
     }
 
     const handleResults = () => {
         const updatedResults: Record<string, {isCorrect: boolean}> = {};
         
-        questions.forEach(q => {
+        currentQuestions.forEach(q => {
             const userAnswer: string[] = userAnswersRef.current[q.id] ?? [];
             const isCorrect = q.answer.length === userAnswer.length &&
             q.answer.every(a => userAnswer.includes(a));
@@ -83,8 +84,8 @@ export default function PhasePage() {
     }, [isPerfect]);
     
     useEffect(() => {
-    console.log('questions', questions);
-    }, [questions]);
+    console.log('questions', currentQuestions);
+    }, [currentQuestions]);
 
 
 
@@ -120,7 +121,7 @@ export default function PhasePage() {
 
             <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} userAnswersRef={userAnswersRef} results={results?? {}} isSubmitted={isSubmitted} />
 
-            {currentPhaseType === 'exercise' && <ExerciseSubmitBar questions={questions} isPerfect={isPerfect} isSubmitted={isSubmitted} onSubmit={handleSubmit} unAnsweredCount={unAnsweredCount} onExerciseFinished={handleUnansweredCount} />}
+            {currentPhaseType === 'exercise' && <ExerciseSubmitBar questions={currentQuestions} isPerfect={isPerfect} isSubmitted={isSubmitted} onSubmit={handleSubmit} unAnsweredCount={unAnsweredCount} onExerciseFinished={handleUnansweredCount} />}
 
             <Footer currentPhaseIndex={currentPhaseIndex} phaseLength={phaseLength} canGoNext={canGoNext} canGoPrevious={canGoPrevious} onGoNext={() => {goNextPhase(); handleScrollToTopRef()}} onGoPrevious={goPrevPhase}/>
 
@@ -217,12 +218,14 @@ function CardField({currentPhaseType, currentContents, userAnswersRef, results, 
     return (
         <div className="card-field-container">
             {currentContents.map((content) => {
+                
                 const isExerciseCard = currentPhaseType === 'exercise';
                 let isCorrectCard: boolean = false;
-                if(isExerciseCard) {
+                if(isExerciseCard && results !== undefined) {
                     const exerciseCardQuestions: Question[] = content.body.filter(b => b.kind === 'exercise').flatMap(b => b.question).filter(q => q.id);
                     isCorrectCard = exerciseCardQuestions.every(q => results?.[q.id]?.isCorrect === true);
                 }
+
                 return (
                     <div className={`card-wrapper ${currentPhaseType} ${isSubmitted ? isCorrectCard ? 'correct' : 'incorrect' : '' }`} key={content.id}>
                         {content.body.map((block) => {
