@@ -1,6 +1,6 @@
 'use client';
 import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, LessonData, PhaseData, Question, TextBlock } from "./dummyData";
-import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar, FaExclamationTriangle } from "react-icons/fa";
+import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar, FaExclamationTriangle, FaRegCircle, FaTimes } from "react-icons/fa";
 import "./phase-style.css";
 import React, { useRef, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
@@ -81,6 +81,11 @@ export default function PhasePage() {
     useEffect(() => {
     console.log('isPerfect', isPerfect);
     }, [isPerfect]);
+    
+    useEffect(() => {
+    console.log('questions', questions);
+    }, [questions]);
+
 
 
     // ----- Footerボタン制御関係 -----
@@ -201,7 +206,7 @@ function PhaseDescription({description, ref}: PhaseDescriptionProps) {
 }
 
 interface CardFieldProps {
-    currentPhaseType: string;
+    currentPhaseType: 'instruction' | 'exercise' | 'feedback';
     currentContents: ContentData[];
     userAnswersRef: React.RefObject<Record<string, string[]>>;
     results?: Record<string, {isCorrect: boolean}>;
@@ -212,8 +217,14 @@ function CardField({currentPhaseType, currentContents, userAnswersRef, results, 
     return (
         <div className="card-field-container">
             {currentContents.map((content) => {
+                const isExerciseCard = currentPhaseType === 'exercise';
+                let isCorrectCard: boolean = false;
+                if(isExerciseCard) {
+                    const exerciseCardQuestions: Question[] = content.body.filter(b => b.kind === 'exercise').flatMap(b => b.question).filter(q => q.id);
+                    isCorrectCard = exerciseCardQuestions.every(q => results?.[q.id]?.isCorrect === true);
+                }
                 return (
-                    <div className={`card-wrapper ${currentPhaseType}`} key={content.id}>
+                    <div className={`card-wrapper ${currentPhaseType} ${isSubmitted ? isCorrectCard ? 'correct' : 'incorrect' : '' }`} key={content.id}>
                         {content.body.map((block) => {
                             switch (block.kind) {
                                 case 'text':
@@ -312,6 +323,7 @@ function ExerciseQuestion({question, userAnswersRef, result, isSubmitted}: Exerc
     const answerType: 'single' | 'multiple' = question.answerType;
     const currentAnswersRef: string[] = userAnswersRef.current[id] ?? [];
     const [currentAnswers, setCurrentAnswers] = useState<string[]>(currentAnswersRef);
+    const isCorrect = result?.isCorrect;
 
     const handleUserChoices = (choiceId: string) => {
         let updatedAnswers: string[];
@@ -339,8 +351,21 @@ function ExerciseQuestion({question, userAnswersRef, result, isSubmitted}: Exerc
     }
 
     return (
-        <div className="question" key={id}>
+        <div className={`question ${isSubmitted ? isCorrect ? 'correct' : 'incorrect' : ''}`} key={id}>
             <ReactMarkdown>{sentence ?? ''}</ReactMarkdown>
+            {isSubmitted && 
+                <div className="question-result">
+                    {isCorrect ? 
+                        <div className="question-result correct">
+                            <FaRegCircle /> good!
+                        </div>
+                        :
+                        <div className="question-result incorrect">
+                            <FaTimes /> bad...
+                        </div>
+                    }            
+                </div>
+            }
             <ul className="question-choices">
                 {
                     question.choices.map(({id, label}) => {
@@ -353,6 +378,7 @@ function ExerciseQuestion({question, userAnswersRef, result, isSubmitted}: Exerc
                                         type={'checkbox'}
                                         name={choiceId}
                                         checked={currentAnswers.includes(choiceId)}
+                                        disabled={isSubmitted}
                                         onChange={() => handleUserChoices(choiceId)}
                                     />
                                     {label}
@@ -380,7 +406,7 @@ function ExerciseSubmitBar({questions, isSubmitted, unAnsweredCount, isPerfect, 
 
     return (
         <div className="submit-bar-container">
-            <button className="submit-button check" onClick={() => {setIsModalOpen(true); onExerciseFinished();}}>回答する</button>
+            {!isSubmitted && <button className="submit-button check" onClick={() => {setIsModalOpen(true); onExerciseFinished();}}>回答する</button>}
             {isModalOpen && 
                 <div className="exercise-modal-background">
                     <div className="exercise-modal-wrapper">
@@ -392,7 +418,7 @@ function ExerciseSubmitBar({questions, isSubmitted, unAnsweredCount, isPerfect, 
                         )}
                         <div className="exercise-modal-check">回答を提出しますか？</div>
                         <div className="exercise-modal-button">
-                            <button className="button-yes" onClick={onSubmit} >回答を提出する</button>
+                            <button className="button-yes" onClick={() => {onSubmit(), setIsModalOpen(false)}} >回答を提出する</button>
                             <button className="button-no" onClick={() => setIsModalOpen(false)} >キャンセル</button>
                         </div>
                     </div>
