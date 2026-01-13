@@ -18,7 +18,7 @@ export default function PhasePage() {
     const handleScrollToTopRef = () => {
         scrollToTopRef!.current!.scrollIntoView({
             behavior: "instant",
-            block: "nearest"
+            block: "center"
         });
     }
 
