@@ -43,7 +43,7 @@ export default function PhasePage() {
     const currentQuestions: Question[] = currentExerciseBlocks.flatMap(b => b.question);
 
     const handleUnansweredCount = () => {
-        const updatedUnAnsweredCount: number = currentQuestions.filter(q => (userAnswersRef.current[q.id] ?? []).length === 0).map(q => q.id).length;
+        const updatedUnAnsweredCount: number = currentQuestions.filter(q => (userAnswersRef.current[q.id] ?? []).length === 0).length;
         setUnansweredCount(updatedUnAnsweredCount);
     }
 
@@ -101,29 +101,7 @@ export default function PhasePage() {
     
     const isPerfect: boolean = isSubmitted && checkIsPerfect(results, unAnsweredCount);
 
-
-    // ----- 監視用(あとで消す) -----
-    useEffect(() => {
-    console.log('userAnswersRef', userAnswersRef.current);
-    }, [isSubmitted]);
-
-    useEffect(() => {
-    console.log('results', results);
-    }, [results]);
-
-    useEffect(() => {
-    console.log('unAnsweredCount', unAnsweredCount);
-    }, [unAnsweredCount]);
-
-    useEffect(() => {
-    console.log('isPerfect', isPerfect);
-    }, [isPerfect]);
     
-    useEffect(() => {
-    console.log('questions', currentQuestions);
-    }, [currentQuestions]);
-
-
 
     // ----- Footerボタン制御関係 -----
 
