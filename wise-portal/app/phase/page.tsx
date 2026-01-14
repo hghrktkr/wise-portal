@@ -4,6 +4,8 @@ import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar, FaExclamationTriangl
 import "./phase-style.css";
 import React, { useRef, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+import { UserAttempt } from "./userStorage";
+import { getLatestUserAttemptByPhaseId, saveUserAttempt } from "./userAttemptsStorage";
 
 export default function PhasePage() {
 
@@ -31,6 +33,7 @@ export default function PhasePage() {
     const [results, setResults] = useState< Record<string, {isCorrect: boolean}> >({});
     const [isSubmitted, setIsSubmitted] = useState< boolean >(false);
     const [unAnsweredCount, setUnansweredCount] = useState< number >(0);
+    const [answerSyncKey, setAnswerSyncKey] = useState< number >(0);
     const userAnswersRef = useRef<Record<string, string[]>>({});
     const currentExerciseBlocks: ExerciseBlock[] = currentPhase.type === 'exercise'
                                                                 ? currentPhase.contents
@@ -46,7 +49,7 @@ export default function PhasePage() {
 
     const handleResults = () => {
         const updatedResults: Record<string, {isCorrect: boolean}> = {};
-        
+
         currentQuestions.forEach(q => {
             const userAnswer: string[] = userAnswersRef.current[q.id] ?? [];
             const isCorrect = q.answer.length === userAnswer.length &&
@@ -55,6 +58,18 @@ export default function PhasePage() {
             updatedResults[q.id] = {isCorrect: isCorrect};
         });
         setResults(updatedResults);
+
+        const isResultPerfect: boolean = checkIsPerfect(updatedResults, unAnsweredCount);
+        const userAttempt: UserAttempt = {
+            attemptId: crypto.randomUUID(),
+            phaseId: currentPhase.id,
+            isPerfect: isResultPerfect,
+            submittedAt: Date.now(),
+            userAnswers: structuredClone(updatedResults)
+        }
+
+        console.log(userAttempt);
+        saveUserAttempt(userAttempt);
     }
 
     const handleSubmit = () => {
@@ -62,8 +77,29 @@ export default function PhasePage() {
         setIsSubmitted(true);
     }
 
-    const isPerfect: boolean = isSubmitted && unAnsweredCount === 0 && Object.values(results).every(r => r.isCorrect);
+    const handleRetry = (phaseId: string) => {
+        const latestUserAttempt: UserAttempt | undefined = getLatestUserAttemptByPhaseId(phaseId);
+        if(!latestUserAttempt) return;
+        
+        if(latestUserAttempt.isPerfect) {
+            setResults({});
+            userAnswersRef.current = {};
+            setUnansweredCount(0);
+        } else {
+            setResults(latestUserAttempt.userAnswers);
+        }
+        setAnswerSyncKey(key => key + 1);
+        setIsSubmitted(false);
+    }
 
+    const checkIsPerfect = (
+        results:Record<string, {isCorrect: boolean}>,
+        unAnsweredCount: number
+    ) => {
+        return unAnsweredCount === 0 && Object.values(results).every(r => r.isCorrect);
+    }
+    
+    const isPerfect: boolean = isSubmitted && checkIsPerfect(results, unAnsweredCount);
 
 
     // ----- 監視用(あとで消す) -----
@@ -119,9 +155,9 @@ export default function PhasePage() {
 
             <PhaseDescription description={DUMMY_LESSON.description} ref={scrollToTopRef} />
 
-            <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} userAnswersRef={userAnswersRef} results={results?? {}} isSubmitted={isSubmitted} />
+            <CardField currentPhaseType={currentPhaseType} currentContents={currentContents} userAnswersRef={userAnswersRef} results={results?? {}} isSubmitted={isSubmitted} answerSyncKey={answerSyncKey} />
 
-            {currentPhaseType === 'exercise' && <ExerciseSubmitBar questions={currentQuestions} isPerfect={isPerfect} isSubmitted={isSubmitted} onSubmit={handleSubmit} unAnsweredCount={unAnsweredCount} onExerciseFinished={handleUnansweredCount} />}
+            {currentPhaseType === 'exercise' && <ExerciseSubmitBar questions={currentQuestions} isPerfect={isPerfect} isSubmitted={isSubmitted} onSubmit={handleSubmit} onRetry={handleRetry} phaseId={currentPhase.id} unAnsweredCount={unAnsweredCount} onExerciseFinished={handleUnansweredCount} />}
 
             <Footer currentPhaseIndex={currentPhaseIndex} phaseLength={phaseLength} canGoNext={canGoNext} canGoPrevious={canGoPrevious} onGoNext={() => {goNextPhase(); handleScrollToTopRef()}} onGoPrevious={goPrevPhase}/>
 
@@ -212,9 +248,10 @@ interface CardFieldProps {
     userAnswersRef: React.RefObject<Record<string, string[]>>;
     results?: Record<string, {isCorrect: boolean}>;
     isSubmitted: boolean;
+    answerSyncKey: number;
 }
 
-function CardField({currentPhaseType, currentContents, userAnswersRef, results, isSubmitted}: CardFieldProps) {
+function CardField({currentPhaseType, currentContents, userAnswersRef, results, isSubmitted, answerSyncKey}: CardFieldProps) {
     return (
         <div className="card-field-container">
             {currentContents.map((content) => {
@@ -235,7 +272,7 @@ function CardField({currentPhaseType, currentContents, userAnswersRef, results, 
                                 case 'image':
                                     return <ImageCardBlock key={block.id} item={block}/>;
                                 case 'exercise':
-                                    return <ExerciseCardBlock key={block.id} item={block} userAnswersRef={userAnswersRef} results={results} isSubmitted={isSubmitted} />;
+                                    return <ExerciseCardBlock key={block.id} item={block} userAnswersRef={userAnswersRef} results={results} isSubmitted={isSubmitted} answerSyncKey={answerSyncKey} />;
                                 default:
                                     return null;
                             }
@@ -295,9 +332,10 @@ interface ExerciseCardBlockProps {
     userAnswersRef: React.RefObject<Record<string, string[]>>;
     results?: Record<string, {isCorrect: boolean}>;
     isSubmitted: boolean;
+    answerSyncKey: number;
 }
 
-function ExerciseCardBlock({item, userAnswersRef, results, isSubmitted}: ExerciseCardBlockProps) {
+function ExerciseCardBlock({item, userAnswersRef, results, isSubmitted, answerSyncKey}: ExerciseCardBlockProps) {
     const question: Question[] = item.question;
 
     return (
@@ -305,7 +343,7 @@ function ExerciseCardBlock({item, userAnswersRef, results, isSubmitted}: Exercis
             {
                 question.map((question) => {
                     return (
-                        <ExerciseQuestion key={question.id} question={question} userAnswersRef={userAnswersRef} result={results ? results[question.id] : undefined} isSubmitted={isSubmitted} />
+                        <ExerciseQuestion key={question.id} question={question} userAnswersRef={userAnswersRef} result={results ? results[question.id] : undefined} isSubmitted={isSubmitted} answerSyncKey={answerSyncKey} />
                     )
                 })
             }
@@ -318,9 +356,10 @@ interface ExerciseQuestionProps {
     userAnswersRef: React.RefObject<Record<string, string[]>>;
     result: {isCorrect : boolean} | undefined;
     isSubmitted: boolean;
+    answerSyncKey: number;
 }
 
-function ExerciseQuestion({question, userAnswersRef, result, isSubmitted}: ExerciseQuestionProps) {
+function ExerciseQuestion({question, userAnswersRef, result, isSubmitted, answerSyncKey}: ExerciseQuestionProps) {
     const id: string = question.id;
     const sentence: undefined | string = question.questionSentence;
     const answerType: 'single' | 'multiple' = question.answerType;
@@ -353,6 +392,10 @@ function ExerciseQuestion({question, userAnswersRef, result, isSubmitted}: Exerc
         userAnswersRef.current[id] = updatedAnswers;
     }
 
+    useEffect(() => {
+        setCurrentAnswers(userAnswersRef.current[id] ?? []);
+    }, [answerSyncKey]);
+
     return (
         <div className={`question ${isSubmitted ? isCorrect ? 'correct' : 'incorrect' : ''}`} key={id}>
             <ReactMarkdown>{sentence ?? ''}</ReactMarkdown>
@@ -381,7 +424,7 @@ function ExerciseQuestion({question, userAnswersRef, result, isSubmitted}: Exerc
                                         type={'checkbox'}
                                         name={choiceId}
                                         checked={currentAnswers.includes(choiceId)}
-                                        disabled={isSubmitted}
+                                        disabled={isSubmitted ? true : isCorrect ? true : false}
                                         onChange={() => handleUserChoices(choiceId)}
                                     />
                                     {label}
@@ -401,15 +444,18 @@ interface ExerciseSubmitBarProps {
     unAnsweredCount: number;
     isPerfect: boolean;
     onSubmit: () => void;
+    onRetry: (phaseId: string) => void;
+    phaseId: string;
     onExerciseFinished: () => void;
 }
 
-function ExerciseSubmitBar({questions, isSubmitted, unAnsweredCount, isPerfect, onSubmit, onExerciseFinished}: ExerciseSubmitBarProps) {
+function ExerciseSubmitBar({questions, isSubmitted, unAnsweredCount, isPerfect, onSubmit, onRetry, phaseId, onExerciseFinished}: ExerciseSubmitBarProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
         <div className="submit-bar-container">
             {!isSubmitted && <button className="submit-button check" onClick={() => {setIsModalOpen(true); onExerciseFinished();}}>回答する</button>}
+            {isSubmitted && <button className="submit-button check" onClick={() => onRetry(phaseId)}>リトライする</button>}
             {isModalOpen && 
                 <div className="exercise-modal-background">
                     <div className="exercise-modal-wrapper">
