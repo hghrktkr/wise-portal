@@ -1,5 +1,5 @@
 'use client';
-import { ContentData, DUMMY_LESSON, ExerciseBlock, ImageBlock, LessonData, PhaseData, Question, TextBlock } from "./dummyData";
+import { ContentData, DUMMY_LESSON, ExerciseBlock, FeedbackBlock, ImageBlock, LessonData, PhaseData, Question, TextBlock } from "./dummyData";
 import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar, FaExclamationTriangle, FaRegCircle, FaTimes } from "react-icons/fa";
 import "./phase-style.css";
 import React, { useRef, useState, useEffect } from "react";
@@ -101,6 +101,45 @@ export default function PhasePage() {
     
     const isPerfect: boolean = isSubmitted && checkIsPerfect(results, unAnsweredCount);
 
+    useEffect(() => {
+        setIsSubmitted(false);
+        setResults({});
+        setUnansweredCount(0);
+        userAnswersRef.current = {};
+        setAnswerSyncKey(key => key + 1);
+    }, [currentPhaseIndex]);
+
+    useEffect(() => {
+        if (currentPhase.type !== 'exercise') return;
+
+        const userAttempt = getLatestUserExerciseAttemptByPhaseId(currentPhase.id) ?? undefined;
+
+        if (!userAttempt) {
+            // 初回
+            setResults({});
+            userAnswersRef.current = {};
+            setIsSubmitted(false);
+            return;
+        }
+
+        // 復元
+        setResults(userAttempt.userAnswers);
+        setIsSubmitted(true);
+
+        const restoredAnswers: Record<string, string[]> = {};
+        currentQuestions.forEach(q => {
+            const result = userAttempt.userAnswers[q.id];
+            restoredAnswers[q.id] = result?.isCorrect
+                ? [ ... q.answer]
+                : [];
+        });
+        userAnswersRef.current = restoredAnswers;
+        
+
+        // UI 再同期用
+        setAnswerSyncKey(k => k + 1);
+
+    }, [currentPhase.id]);
 
 
     // ----- Footerボタン制御関係 -----
@@ -251,6 +290,10 @@ function CardField({currentPhaseType, currentContents, userAnswersRef, results, 
                                     return <ImageCardBlock key={block.id} item={block}/>;
                                 case 'exercise':
                                     return <ExerciseCardBlock key={block.id} item={block} userAnswersRef={userAnswersRef} results={results} isSubmitted={isSubmitted} answerSyncKey={answerSyncKey} />;
+                                case 'rate':
+                                    return <FeedbackCardBlock key={block.id} item={block} isSubmitted={isSubmitted} />
+                                case 'comment':
+                                    return <FeedbackCardBlock key={block.id} item={block} isSubmitted={isSubmitted} />
                                 default:
                                     return null;
                             }
@@ -412,6 +455,49 @@ function ExerciseQuestion({question, userAnswersRef, result, isSubmitted, answer
                     })
                 }
             </ul>
+        </div>
+    )
+}
+
+interface FeedbackCardBlockProps {
+    item: FeedbackBlock;
+    isSubmitted: boolean;
+}
+
+function FeedbackCardBlock({item, isSubmitted}: FeedbackCardBlockProps) {
+    if(item.kind === 'rate' && item.rate) {
+        return (
+            <div className="feedback-item">
+                <ReactMarkdown>{item.survey_sentence}</ReactMarkdown>
+                <ul className="feedback-wrapper rate">
+                    {
+                        item.rate.map(r => (
+                            <li className="feedback-choices" key={r.id}>
+                                <label>
+                                    <input
+                                        type={'checkbox'}
+                                        name={item.id}
+                                        disabled={isSubmitted}
+                                    />
+                                {r.label}
+                                </label>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </div>
+        )
+    }
+    return (
+        <div className="feedback-item">
+            <ReactMarkdown>{item.survey_sentence}</ReactMarkdown>
+            <div className="feedback-wrapper comment">
+                <input
+                    type={'text'}
+                    name={item.id}
+                    disabled={isSubmitted}
+                />
+            </div>
         </div>
     )
 }

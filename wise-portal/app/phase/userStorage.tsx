@@ -11,6 +11,6 @@ export interface UserFeedbackAttempt {
     phaseId: string;
     isPerfect: boolean;
     submittedAt: number;
-    rating: Record<string, {rate: 1 | 2 | 3}>;
-    comment: string;
+    rate: Record<string, string[]>;
+    comment?: string;
 }

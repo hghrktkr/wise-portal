@@ -45,7 +45,20 @@ export interface Question {
     answerType: 'single' | 'multiple';
 }
 
-export type ContentBlock = TextBlock | ImageBlock | ExerciseBlock;
+export interface FeedbackBlock {
+    id: string;
+    kind: 'rate' | 'comment';
+    survey_sentence: string;    // Markdown
+    rate?: FeedbackRate[];
+}
+
+export interface FeedbackRate {
+    id: string;
+    label: string;
+    value: number;
+}
+
+export type ContentBlock = TextBlock | ImageBlock | ExerciseBlock | FeedbackBlock;
 
 
 
@@ -492,9 +505,47 @@ export const DUMMY_LESSON: LessonData = {
                     id: 'content_f1',
                     body: [
                         {
-                            id: 'lesson1-phase4-content1-feedback1',
-                            kind: 'text',
-                            value: 'このレッスンの感想を入力してください。'
+                            id: 'lesson1-phase4-content1-feedback-fun',
+                            kind: 'rate',
+                            survey_sentence: `
+今日の内容はたのしかったですか？
+                            `,
+                            rate: [
+                                {id: 'fun_3', label: 'たのしかった', value: 3},
+                                {id: 'fun_2', label: 'まあまあ', value: 2},
+                                {id: 'fun_1', label: 'あんまり', value: 1}
+                            ]
+                        }
+                    ],
+                    needsAnswer: true
+                },
+                {
+                    id: 'content_f2',
+                    body: [
+                        {
+                            id: 'lesson1-phase4-content1-feedback-difficulty',
+                            kind: 'rate',
+                            survey_sentence: `
+今日の内容はむずかしかったですか？
+                            `,
+                            rate: [
+                                {id: 'dif_3', label: 'むずかしかった', value: 3},
+                                {id: 'dif_2', label: 'まあまあ', value: 2},
+                                {id: 'dif_1', label: 'かんたんだった', value: 1}
+                            ]
+                        }
+                    ],
+                    needsAnswer: true
+                },
+                {
+                    id: 'content_3',
+                    body: [
+                        {
+                            id: 'lesson1-phase4-content1-feedback-comment',
+                            kind: 'comment',
+                            survey_sentence: `
+今日の感想を教えてください。
+                            `
                         }
                     ],
                     needsAnswer: true
