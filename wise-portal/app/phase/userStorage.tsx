@@ -1,4 +1,4 @@
-export interface UserAttempt {
+export interface UserExerciseAttempt {
     attemptId: string;
     phaseId: string;
     isPerfect: boolean;

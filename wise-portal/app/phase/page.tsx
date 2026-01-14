@@ -4,8 +4,8 @@ import { FaCheck, FaChalkboardTeacher, FaPencilAlt, FaStar, FaExclamationTriangl
 import "./phase-style.css";
 import React, { useRef, useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { UserAttempt } from "./userStorage";
-import { getLatestUserAttemptByPhaseId, saveUserAttempt } from "./userAttemptsStorage";
+import { UserExerciseAttempt } from "./userStorage";
+import { getLatestUserExerciseAttemptByPhaseId, saveUserExerciseAttempt } from "./userAttemptsStorage";
 
 export default function PhasePage() {
 
@@ -60,7 +60,7 @@ export default function PhasePage() {
         setResults(updatedResults);
 
         const isResultPerfect: boolean = checkIsPerfect(updatedResults, unAnsweredCount);
-        const userAttempt: UserAttempt = {
+        const userAttempt: UserExerciseAttempt = {
             attemptId: crypto.randomUUID(),
             phaseId: currentPhase.id,
             isPerfect: isResultPerfect,
@@ -69,7 +69,7 @@ export default function PhasePage() {
         }
 
         console.log(userAttempt);
-        saveUserAttempt(userAttempt);
+        saveUserExerciseAttempt(userAttempt);
     }
 
     const handleSubmit = () => {
@@ -78,7 +78,7 @@ export default function PhasePage() {
     }
 
     const handleRetry = (phaseId: string) => {
-        const latestUserAttempt: UserAttempt | undefined = getLatestUserAttemptByPhaseId(phaseId);
+        const latestUserAttempt: UserExerciseAttempt | undefined = getLatestUserExerciseAttemptByPhaseId(phaseId);
         if(!latestUserAttempt) return;
         
         if(latestUserAttempt.isPerfect) {
@@ -101,7 +101,7 @@ export default function PhasePage() {
     
     const isPerfect: boolean = isSubmitted && checkIsPerfect(results, unAnsweredCount);
 
-    
+
 
     // ----- Footerボタン制御関係 -----
 
