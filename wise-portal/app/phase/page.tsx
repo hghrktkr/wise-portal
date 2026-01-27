@@ -492,9 +492,10 @@ function FeedbackCardBlock({item, isSubmitted}: FeedbackCardBlockProps) {
         <div className="feedback-item">
             <ReactMarkdown>{item.survey_sentence}</ReactMarkdown>
             <div className="feedback-wrapper comment">
-                <input
-                    type={'text'}
-                    name={item.id}
+                <textarea
+                    placeholder="きょうは、○○についてのプログラミングをつくりました。"
+                    key={item.id}
+                    onChange={e => {}}
                     disabled={isSubmitted}
                 />
             </div>
